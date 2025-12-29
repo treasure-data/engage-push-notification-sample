@@ -9,6 +9,8 @@ import com.treasuredata.android.TreasureData
 import com.treasuredata.pushsample.BuildConfig
 import com.treasuredata.pushsample.utils.TimeUtils
 
+// REQUIRED: FCM Token Management Service
+// This object handles registration and association of FCM tokens with Treasure Data
 object FcmTokenService {
 
     private const val TAG = "FcmTokenService"
@@ -46,6 +48,8 @@ object FcmTokenService {
         logDebug(TAG, "Token registration event added to Treasure Data SDK")
     }
 
+    // CUSTOMIZE: Associate a user ID with the FCM token
+    // Call this method after user login to link push notifications to a specific user
     fun associateUser(context: Context, userId: String) {
         val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
         prefs.edit().putString(KEY_USER_ID, userId).apply()
@@ -54,6 +58,8 @@ object FcmTokenService {
         registerToken(context)
     }
 
+    // CUSTOMIZE: Dissociate user ID from FCM token
+    // Call this method after user logout
     fun dissociateUser(context: Context) {
         val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
         prefs.edit().remove(KEY_USER_ID).apply()

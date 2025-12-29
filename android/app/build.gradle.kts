@@ -10,6 +10,7 @@ android {
     compileSdk = 34
 
     defaultConfig {
+        // CUSTOMIZE: Change to your app's package name
         applicationId = "com.treasuredata.pushsample"
         minSdk = 26
         targetSdk = 34
@@ -18,14 +19,20 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // Deep link scheme configuration
+        // CUSTOMIZE: Deep link scheme configuration
+        // Define a unique scheme for your app (e.g., "myapp", "yourcompany")
+        // This will be used for deep links like "myapp://product/12345"
         buildConfigField("String", "DEEP_LINK_SCHEME", "\"tdpushsample\"")
         manifestPlaceholders["deepLinkScheme"] = "tdpushsample"
 
-        // URL allowlist configuration (comma-separated domains)
+        // CUSTOMIZE: URL allowlist configuration (comma-separated domains)
+        // Add domains that are allowed to be opened from push notifications
+        // This is a security measure to prevent malicious links
         buildConfigField("String", "ALLOWED_DOMAINS", "\"example.com,treasuredata.com\"")
 
-        // Deep link host allowlist (comma-separated hosts)
+        // CUSTOMIZE: Deep link host allowlist (comma-separated hosts)
+        // Define the hosts that your deep link routing supports
+        // Example: "product,category,home" for "myapp://product/...", "myapp://category/...", etc.
         buildConfigField("String", "ALLOWED_DEEP_LINK_HOSTS", "\"product,category,home\"")
     }
 

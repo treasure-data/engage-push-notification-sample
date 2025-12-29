@@ -37,6 +37,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
            let tdDatabase = Bundle.main.object(forInfoDictionaryKey: "TDDatabase") as? String {
             TreasureData.initialize(withApiKey: tdWriteKey, apiEndpoint: tdEndpoint)
             TreasureData.sharedInstance().defaultDatabase = tdDatabase
+
+            // Enable automatic data collection
+            // These methods automatically append useful information to all events
+            TreasureData.sharedInstance().enableAutoAppendUniqId()
+            TreasureData.sharedInstance().enableAutoAppendModelInformation()
+            TreasureData.sharedInstance().enableAutoAppendAppInformation()
+            TreasureData.sharedInstance().enableAutoAppendLocaleInformation()
+
             LogHelper.debug("Treasure Data SDK initialized")
             LogHelper.debug("Database: \(tdDatabase)")
             LogHelper.debug("Endpoint: \(tdEndpoint)")

@@ -29,7 +29,9 @@ class MainActivity : AppCompatActivity() {
     companion object {
         private const val TAG = "MainActivity"
 
-        // Parse allowlists from BuildConfig
+        // CUSTOMIZE: Parse allowlists from BuildConfig
+        // These allowlists are defined in build.gradle.kts
+        // Modify them to match your app's supported deep link hosts and web domains
         private val ALLOWED_DEEP_LINK_HOSTS by lazy {
             BuildConfig.ALLOWED_DEEP_LINK_HOSTS.split(",").map { it.trim() }.toSet()
         }
@@ -228,10 +230,17 @@ class MainActivity : AppCompatActivity() {
         handleDeepLinkUri(uri, deepLink, campaignId, messageId)
     }
 
+    // CUSTOMIZE: Deep Link Routing Logic
+    // This function handles deep link navigation based on the URI host
+    // Modify the when() cases to match your app's screen structure
+    // Example deep links:
+    //   - myapp://product/12345 -> Product detail screen
+    //   - myapp://category/electronics -> Category list screen
+    //   - myapp://home -> Home screen
     private fun handleDeepLinkUri(uri: Uri, deepLink: String, campaignId: String, messageId: String) {
         logDebug(TAG, getString(R.string.log_deep_link_opened, uri.toString()))
 
-        // Validate deep link host against allowlist
+        // REQUIRED: Validate deep link host against allowlist (Security measure)
         if (uri.host !in ALLOWED_DEEP_LINK_HOSTS) {
             logWarn(TAG, getString(R.string.log_unknown_deep_link_host, uri.host))
             trackLinkFailEvent(deepLink, campaignId, messageId, "unknown_path")
@@ -239,8 +248,10 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
+        // CUSTOMIZE: Add cases for your app's deep link hosts
         when (uri.host) {
             "product" -> {
+                // Example: myapp://product/12345
                 val productId = uri.lastPathSegment
                 if (productId.isNullOrEmpty()) {
                     logWarn(TAG, "Product ID is empty")
@@ -251,7 +262,8 @@ class MainActivity : AppCompatActivity() {
 
                 logDebug(TAG, getString(R.string.log_navigating_to_product, productId))
 
-                // Navigate to ProductDetailActivity
+                // CUSTOMIZE: Navigate to your product detail screen
+                // Replace ProductDetailActivity with your own activity
                 val intent = Intent(Intent.ACTION_VIEW, uri, this, ProductDetailActivity::class.java).apply {
                     // Pass through campaign tracking extras if they exist
                     this@MainActivity.intent?.let { mainIntent ->
@@ -266,6 +278,7 @@ class MainActivity : AppCompatActivity() {
                 trackLinkArriveEvent(deepLink, campaignId, messageId)
             }
             "category" -> {
+                // Example: myapp://category/electronics
                 val categoryId = uri.lastPathSegment
                 if (categoryId.isNullOrEmpty()) {
                     logWarn(TAG, "Category ID is empty")
@@ -276,7 +289,8 @@ class MainActivity : AppCompatActivity() {
 
                 logDebug(TAG, getString(R.string.log_navigating_to_category, categoryId))
 
-                // Navigate to CategoryActivity
+                // CUSTOMIZE: Navigate to your category screen
+                // Replace CategoryActivity with your own activity
                 val intent = Intent(Intent.ACTION_VIEW, uri, this, CategoryActivity::class.java).apply {
                     // Pass through campaign tracking extras if they exist
                     this@MainActivity.intent?.let { mainIntent ->
@@ -291,6 +305,7 @@ class MainActivity : AppCompatActivity() {
                 trackLinkArriveEvent(deepLink, campaignId, messageId)
             }
             "home" -> {
+                // Example: myapp://home
                 logDebug(TAG, getString(R.string.log_navigating_to_home))
                 // Already at home (MainActivity)
                 binding.statusTextView.text = getString(R.string.deep_link_home)
@@ -298,6 +313,10 @@ class MainActivity : AppCompatActivity() {
                 // Track successful arrival
                 trackLinkArriveEvent(deepLink, campaignId, messageId)
             }
+            // CUSTOMIZE: Add more cases for your app's deep link hosts
+            // Example:
+            // "settings" -> { /* Navigate to settings screen */ }
+            // "search" -> { /* Navigate to search screen with query */ }
         }
     }
 
@@ -417,6 +436,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     // MARK: - Event Tracking
+    // OPTIONAL: These event tracking methods send data to Treasure Data
+    // You can add custom properties to events or create new event types
 
     private fun trackOpenEvent(campaignId: String, messageId: String) {
         lifecycleScope.launch {
@@ -429,6 +450,8 @@ class MainActivity : AppCompatActivity() {
                     "platform" to "android",
                     "fcm_token" to token,
                     "time" to TimeUtils.getCurrentTimestamp()
+                    // CUSTOMIZE: Add custom event properties here
+                    // Example: "user_id" to getCurrentUserId()
                 )
 
                 TreasureData.sharedInstance().addEvent(BuildConfig.TD_TABLE, event)

@@ -30,6 +30,8 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         private const val IMAGE_CONNECT_TIMEOUT_MS = 5000
     }
 
+    // REQUIRED: Handle incoming FCM messages
+    // This method is called when a push notification is received
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
 
@@ -73,7 +75,8 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         }
         logDebug(TAG, "===============================================")
 
-        // Extract notification data
+        // CUSTOMIZE: Extract notification data from FCM payload
+        // These field names should match what you send from Treasure Data Engage
         val campaignId = message.data["campaign_id"] ?: ""
         val messageId = message.data["message_id"] ?: ""
         val title = message.data["title"]
@@ -96,6 +99,8 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         showNotification(title, body, imageUrl, campaignId, messageId, deepLink, webLink)
     }
 
+    // REQUIRED: Handle FCM token refresh
+    // This is called when Firebase generates a new token (e.g., after app reinstall)
     override fun onNewToken(token: String) {
         super.onNewToken(token)
         logDebug(TAG, getString(R.string.log_new_fcm_token, token))
@@ -155,9 +160,10 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             pendingIntentFlags
         )
 
-        // Build notification
+        // CUSTOMIZE: Build notification with your app's style
+        // Modify notification appearance, sound, vibration, etc.
         val notificationBuilder = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_notification)
+            .setSmallIcon(R.drawable.ic_notification) // Change to your app's icon
             .setContentTitle(title)
             .setContentText(body)
             .setStyle(NotificationCompat.BigTextStyle().bigText(body))

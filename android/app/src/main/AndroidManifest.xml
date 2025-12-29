@@ -1,10 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- CUSTOMIZE: Change package name to match your app -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.treasuredata.pushsample">
 
+    <!-- REQUIRED: Internet permission for Treasure Data SDK and FCM -->
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- REQUIRED: Notification permission (Android 13+) -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
+    <!-- REQUIRED: Custom Application class for Treasure Data SDK initialization -->
     <application
         android:name=".MyApplication"
         android:allowBackup="true"
@@ -23,7 +28,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
-            <!-- Deep link intent filter for home -->
+            <!-- CUSTOMIZE: Deep link intent filter for home screen -->
+            <!-- Example: tdpushsample://home -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -34,13 +40,14 @@
             </intent-filter>
         </activity>
 
-        <!-- Product Detail Activity -->
+        <!-- CUSTOMIZE: Product Detail Activity -->
+        <!-- Example deep link: tdpushsample://product/12345 -->
+        <!-- Replace with your own activity for product details -->
         <activity
             android:name=".ProductDetailActivity"
             android:exported="true"
             android:launchMode="singleTop"
             android:parentActivityName=".MainActivity">
-            <!-- Deep link intent filter for product -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -52,13 +59,14 @@
             </intent-filter>
         </activity>
 
-        <!-- Category Activity -->
+        <!-- CUSTOMIZE: Category Activity -->
+        <!-- Example deep link: tdpushsample://category/electronics -->
+        <!-- Replace with your own activity for categories -->
         <activity
             android:name=".CategoryActivity"
             android:exported="true"
             android:launchMode="singleTop"
             android:parentActivityName=".MainActivity">
-            <!-- Deep link intent filter for category -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -70,7 +78,8 @@
             </intent-filter>
         </activity>
 
-        <!-- Firebase Messaging Service -->
+        <!-- REQUIRED: Firebase Messaging Service -->
+        <!-- This service receives FCM push notifications -->
         <service
             android:name=".fcm.MyFirebaseMessagingService"
             android:exported="false">
@@ -79,25 +88,28 @@
             </intent-filter>
         </service>
 
-        <!-- Broadcast Receiver for notification dismiss -->
+        <!-- REQUIRED: Broadcast Receiver for notification dismiss events -->
+        <!-- This receiver tracks when users dismiss notifications -->
         <receiver
             android:name=".fcm.PushEventReceiver"
             android:exported="false">
             <intent-filter>
+                <!-- CUSTOMIZE: Change action name to match your package -->
                 <action android:name="com.treasuredata.pushsample.NOTIFICATION_DISMISSED" />
             </intent-filter>
         </receiver>
 
-        <!-- Firebase Messaging metadata -->
+        <!-- CUSTOMIZE: Firebase Messaging metadata -->
+        <!-- Configure default notification appearance -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
-            android:resource="@drawable/ic_notification" />
+            android:resource="@drawable/ic_notification" /> <!-- Change to your icon -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_color"
-            android:resource="@android:color/holo_blue_light" />
+            android:resource="@android:color/holo_blue_light" /> <!-- Change to your brand color -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
-            android:value="td_push_notifications" />
+            android:value="td_push_notifications" /> <!-- Match with MyFirebaseMessagingService.CHANNEL_ID -->
 
     </application>
 

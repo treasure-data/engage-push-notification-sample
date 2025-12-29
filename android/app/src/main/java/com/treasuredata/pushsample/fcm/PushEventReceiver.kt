@@ -9,6 +9,8 @@ import com.treasuredata.android.TreasureData
 import com.treasuredata.pushsample.BuildConfig
 import com.treasuredata.pushsample.utils.TimeUtils
 
+// REQUIRED: BroadcastReceiver for notification dismiss events
+// This receiver tracks when users dismiss (swipe away) push notifications
 class PushEventReceiver : BroadcastReceiver() {
 
     companion object {
@@ -25,6 +27,8 @@ class PushEventReceiver : BroadcastReceiver() {
 
                 trackDismissEvent(context, campaignId, messageId)
             }
+            // CUSTOMIZE: Add more action handlers here if needed
+            // Example: Custom notification actions (buttons in notifications)
         }
     }
 
@@ -38,6 +42,7 @@ class PushEventReceiver : BroadcastReceiver() {
                     "platform" to "android",
                     "fcm_token" to task.result,
                     "time" to TimeUtils.getCurrentTimestamp()
+                    // CUSTOMIZE: Add custom event properties here
                 )
 
                 TreasureData.sharedInstance().addEvent(BuildConfig.TD_TABLE, event)
