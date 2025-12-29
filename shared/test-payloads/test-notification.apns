@@ -1,0 +1,17 @@
+{
+  "Simulator Target Bundle": "com.treasuredata.pushsample",
+  "aps": {
+    "alert": {
+      "title": "Test Notification",
+      "body": "This is a test push notification from Treasure Data"
+    },
+    "sound": "default",
+    "badge": 1,
+    "mutable-content": 1
+  },
+  "campaign_id": "test_campaign_001",
+  "message_id": "test_message_001",
+  "image": "https://picsum.photos/400/300",
+  "deeplink": "tdpushsample://product/12345",
+  "link": "https://www.treasuredata.com"
+}

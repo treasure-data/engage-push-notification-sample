@@ -1,0 +1,43 @@
+# macOS
+.DS_Store
+
+# iOS
+ios/Pods/
+ios/*.xcworkspace/xcuserdata/
+ios/*.xcodeproj/xcuserdata/
+ios/*.xcodeproj/project.xcworkspace/xcuserdata/
+ios/build/
+ios/DerivedData/
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Firebase config (sensitive)
+ios/TDPushSample/GoogleService-Info.plist
+android/app/google-services.json
+
+# Android
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/.idea/
+*.apk
+*.aab
+
+# Treasure Data API keys (DO NOT COMMIT)
+# iOS: Replace TD_WRITE_KEY in source code:
+#   - ios/TDPushSample/Models/FCMTokenService.swift
+#   - ios/TDPushSample/Models/PushEventUploader.swift
+# Android: Use local.properties (already ignored above):
+#   - android/local.properties contains TD_WRITE_KEY and other config
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log

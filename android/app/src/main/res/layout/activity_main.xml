@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="20dp">
+
+    <TextView
+        android:id="@+id/titleTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Treasure Data\nPush Sample"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:textAlignment="center"
+        android:layout_marginBottom="20dp" />
+
+    <TextView
+        android:id="@+id/tokenTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="FCM Token: Loading..."
+        android:textSize="12sp"
+        android:textColor="@android:color/darker_gray"
+        android:textAlignment="center"
+        android:layout_marginBottom="20dp" />
+
+    <TextView
+        android:id="@+id/statusTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Ready to receive notifications"
+        android:textSize="14sp"
+        android:textAlignment="center"
+        android:layout_marginBottom="20dp" />
+
+    <TextView
+        android:id="@+id/eventCountTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Queued Events: 0"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="30dp" />
+
+    <Button
+        android:id="@+id/refreshButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Refresh Token"
+        android:textSize="16sp"
+        android:layout_marginBottom="20dp" />
+
+    <Button
+        android:id="@+id/uploadButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Upload Events Now"
+        android:textSize="16sp" />
+
+</LinearLayout>

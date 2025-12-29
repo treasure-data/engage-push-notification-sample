@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TD Push Sample</string>
+    <string name="notification_channel_name">Treasure Data Push</string>
+    <string name="notification_channel_description">Push notifications from Treasure Data</string>
+
+    <!-- MainActivity -->
+    <string name="notification_permission_granted">Notification permission granted</string>
+    <string name="notification_permission_denied">Notification permission denied</string>
+    <string name="notification_permission_already_granted">Notification permission already granted</string>
+    <string name="requesting_notification_permission">Requesting notification permission</string>
+    <string name="fcm_token_format">FCM Token: %s</string>
+    <string name="fcm_token_not_available">FCM Token: Not available</string>
+    <string name="fcm_token_shortened">%s…</string>
+    <string name="sdk_ready">SDK: Ready</string>
+    <string name="token_refreshed">Token refreshed successfully</string>
+    <string name="error_fetching_token">Error fetching token</string>
+    <string name="uploading_events">Uploading events…</string>
+    <string name="upload_triggered">Upload triggered - SDK will sync</string>
+    <string name="deep_link_product">Deep link: product/%s</string>
+    <string name="deep_link_category">Deep link: category/%s</string>
+    <string name="deep_link_home">Deep link: home</string>
+
+    <!-- Log messages -->
+    <string name="log_notification_tapped">Notification tapped - campaign: %1$s, message: %2$s</string>
+    <string name="log_deep_link_opened">Deep link opened: %s</string>
+    <string name="log_navigating_to_product">Navigating to product: %s</string>
+    <string name="log_navigating_to_category">Navigating to category: %s</string>
+    <string name="log_navigating_to_home">Navigating to home</string>
+    <string name="log_unknown_deep_link_host">Unknown deep link host: %s</string>
+    <string name="log_invalid_deep_link_scheme">Invalid deep link scheme: %s</string>
+    <string name="log_web_link_opened">Opened web link in Chrome Custom Tabs: %s</string>
+    <string name="log_error_opening_web_link">Error opening web link: %s</string>
+    <string name="log_fcm_token">FCM token: %s</string>
+    <string name="log_manual_upload">Manual upload triggered via TD SDK</string>
+    <string name="log_error_fetching_fcm_token">Error fetching FCM token</string>
+    <string name="log_event_added">%s event added to Treasure Data SDK</string>
+
+    <!-- FCM Service -->
+    <string name="log_fcm_message_received">FCM message received from: %s</string>
+    <string name="log_campaign_id">Campaign ID: %s</string>
+    <string name="log_message_id">Message ID: %s</string>
+    <string name="log_title">Title: %s</string>
+    <string name="log_body">Body: %s</string>
+    <string name="log_new_fcm_token">New FCM token: %s</string>
+    <string name="log_downloading_image">Downloading notification image: %s</string>
+    <string name="log_error_downloading_image">Error downloading image</string>
+    <string name="log_image_attached">Image attached to notification</string>
+    <string name="log_notification_displayed">Notification displayed (ID: %d)</string>
+    <string name="notification_default_title">Notification</string>
+
+    <!-- ProductDetailActivity -->
+    <string name="product_detail_header">Product Details</string>
+    <string name="product_id_label">Product ID:</string>
+    <string name="product_name_format">Product %s</string>
+    <string name="product_description_format">This is a sample product with ID: %s. Deep link navigation successful!</string>
+    <string name="product_name_placeholder">Loading product…</string>
+    <string name="product_description_placeholder">Product description</string>
+    <string name="product_image">Product image</string>
+    <string name="share_product">Share Product</string>
+
+    <!-- CategoryActivity -->
+    <string name="category_header">Category</string>
+    <string name="category_id_label">Category ID:</string>
+    <string name="category_name_format">Category: %s</string>
+    <string name="category_description_format">Browse products in the %s category</string>
+    <string name="category_name_placeholder">Loading category…</string>
+    <string name="category_description_placeholder">Category description</string>
+    <string name="share_category">Share Category</string>
+    <string name="products_in_category">Products in this category</string>
+    <string name="product_item_1">📱 Sample Product 001 - Click to view details</string>
+    <string name="product_item_2">💻 Sample Product 002 - Click to view details</string>
+    <string name="product_item_3">⌚ Sample Product 003 - Click to view details</string>
+
+    <!-- Common -->
+    <string name="campaign_info_label">Campaign Info:</string>
+    <string name="campaign_info_format">Campaign: %1$s, Message: %2$s</string>
+    <string name="no_campaign_info">No campaign information</string>
+    <string name="opened_directly">Opened directly (not from push notification)</string>
+    <string name="back_button">Back to Home</string>
+    <string name="share_button">Share</string>
+
+    <!-- Link handling -->
+    <string name="fallback_to_home">Invalid link - staying at home</string>
+</resources>

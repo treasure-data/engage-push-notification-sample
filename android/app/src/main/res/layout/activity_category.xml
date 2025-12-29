@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".CategoryActivity">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <!-- Header -->
+        <TextView
+            android:id="@+id/headerTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/category_header"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="16dp" />
+
+        <!-- Category ID -->
+        <TextView
+            android:id="@+id/categoryIdLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/category_id_label"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:layout_marginTop="24dp"
+            app:layout_constraintTop_toBottomOf="@id/headerTextView"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/categoryIdTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Loading..."
+            android:textSize="14sp"
+            android:layout_marginStart="8dp"
+            app:layout_constraintTop_toTopOf="@id/categoryIdLabel"
+            app:layout_constraintStart_toEndOf="@id/categoryIdLabel"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Category Name -->
+        <TextView
+            android:id="@+id/categoryNameTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/category_name_placeholder"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginTop="16dp"
+            app:layout_constraintTop_toBottomOf="@id/categoryIdTextView"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Category Description -->
+        <TextView
+            android:id="@+id/categoryDescriptionTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/category_description_placeholder"
+            android:textSize="16sp"
+            android:layout_marginTop="8dp"
+            app:layout_constraintTop_toBottomOf="@id/categoryNameTextView"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Campaign Info -->
+        <TextView
+            android:id="@+id/campaignInfoLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/campaign_info_label"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:layout_marginTop="24dp"
+            app:layout_constraintTop_toBottomOf="@id/categoryDescriptionTextView"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/campaignInfoTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/no_campaign_info"
+            android:textSize="12sp"
+            android:layout_marginTop="4dp"
+            app:layout_constraintTop_toBottomOf="@id/campaignInfoLabel"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Products Section -->
+        <TextView
+            android:id="@+id/productsLabel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/products_in_category"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginTop="24dp"
+            app:layout_constraintTop_toBottomOf="@id/campaignInfoTextView"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Product Item 1 -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/productItem1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:clickable="true"
+            android:focusable="true"
+            app:cardElevation="4dp"
+            app:cardCornerRadius="8dp"
+            app:layout_constraintTop_toBottomOf="@id/productsLabel"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/product_item_1"
+                android:textSize="16sp"
+                android:padding="16dp" />
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Product Item 2 -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/productItem2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:clickable="true"
+            android:focusable="true"
+            app:cardElevation="4dp"
+            app:cardCornerRadius="8dp"
+            app:layout_constraintTop_toBottomOf="@id/productItem1"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/product_item_2"
+                android:textSize="16sp"
+                android:padding="16dp" />
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Product Item 3 -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/productItem3"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:clickable="true"
+            android:focusable="true"
+            app:cardElevation="4dp"
+            app:cardCornerRadius="8dp"
+            app:layout_constraintTop_toBottomOf="@id/productItem2"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/product_item_3"
+                android:textSize="16sp"
+                android:padding="16dp" />
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Buttons -->
+        <Button
+            android:id="@+id/shareButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/share_button"
+            android:layout_marginTop="24dp"
+            app:layout_constraintTop_toBottomOf="@id/productItem3"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <Button
+            android:id="@+id/backButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/back_button"
+            android:layout_marginTop="8dp"
+            app:layout_constraintTop_toBottomOf="@id/shareButton"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

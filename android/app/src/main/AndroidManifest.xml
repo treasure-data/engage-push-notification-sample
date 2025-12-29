@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.treasuredata.pushsample">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <application
+        android:name=".MyApplication"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:launchMode="singleTop">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+            <!-- Deep link intent filter for home -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="${deepLinkScheme}"
+                    android:host="home" />
+            </intent-filter>
+        </activity>
+
+        <!-- Product Detail Activity -->
+        <activity
+            android:name=".ProductDetailActivity"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:parentActivityName=".MainActivity">
+            <!-- Deep link intent filter for product -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="${deepLinkScheme}"
+                    android:host="product"
+                    android:pathPrefix="/" />
+            </intent-filter>
+        </activity>
+
+        <!-- Category Activity -->
+        <activity
+            android:name=".CategoryActivity"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:parentActivityName=".MainActivity">
+            <!-- Deep link intent filter for category -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="${deepLinkScheme}"
+                    android:host="category"
+                    android:pathPrefix="/" />
+            </intent-filter>
+        </activity>
+
+        <!-- Firebase Messaging Service -->
+        <service
+            android:name=".fcm.MyFirebaseMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <!-- Broadcast Receiver for notification dismiss -->
+        <receiver
+            android:name=".fcm.PushEventReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.treasuredata.pushsample.NOTIFICATION_DISMISSED" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Firebase Messaging metadata -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_notification" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@android:color/holo_blue_light" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="td_push_notifications" />
+
+    </application>
+
+</manifest>

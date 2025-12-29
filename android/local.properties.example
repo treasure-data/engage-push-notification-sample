@@ -1,0 +1,15 @@
+## This file must be copied to local.properties and filled with your actual values
+## local.properties is automatically gitignored
+
+# Treasure Data Configuration
+TD_WRITE_KEY=YOUR_TD_WRITE_KEY
+TD_DATABASE=mobile
+TD_TABLE=push_events
+TD_ENDPOINT=https://us01.records.in.treasuredata.com
+
+# Treasure Data Data Ingestion API endpoints by region:
+# US01: https://us01.records.in.treasuredata.com
+# Tokyo (AP01): https://ap01.records.in.treasuredata.com
+# EU01: https://eu01.records.in.treasuredata.com
+# Korea (AP02): https://ap02.records.in.treasuredata.com
+# AP03: https://ap03.records.in.treasuredata.com
