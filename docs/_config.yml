@@ -1,0 +1,66 @@
+# GitHub Pages configuration for Treasure Data Engage Push Notification Sample
+
+# Site settings
+title: Treasure Data Engage Push Notification Sample
+description: Complete iOS/Android push notification sample application for Treasure Data Engage Studio integration
+baseurl: "/engage-push-notification-sample"
+url: "https://treasure-data.github.io"
+
+# Theme
+theme: jekyll-theme-cayman
+# Alternative themes you can use:
+# - jekyll-theme-minimal
+# - jekyll-theme-slate
+# - jekyll-theme-architect
+# - jekyll-theme-tactile
+
+# GitHub metadata
+repository: treasure-data/engage-push-notification-sample
+
+# Markdown settings
+markdown: kramdown
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+
+# Plugins
+plugins:
+  - jekyll-relative-links
+  - jekyll-optional-front-matter
+  - jekyll-readme-index
+
+# Enable relative links
+relative_links:
+  enabled: true
+  collections: false
+
+# Optional front matter
+optional_front_matter:
+  remove_originals: false
+
+# README index
+readme_index:
+  enabled: true
+  remove_originals: false
+
+# Include/Exclude
+include:
+  - SETUP.md
+  - TESTING.md
+  - TROUBLESHOOTING.md
+  - SECURITY.md
+  - API_REFERENCE.md
+  - LINK_IMPLEMENTATION_SUMMARY.md
+  - SETUP_ja.md
+  - TESTING_ja.md
+  - TROUBLESHOOTING_ja.md
+  - SECURITY_ja.md
+  - API_REFERENCE_ja.md
+  - LINK_IMPLEMENTATION_SUMMARY_ja.md
+
+exclude:
+  - Gemfile
+  - Gemfile.lock
+
+# Show downloads button
+show_downloads: true
