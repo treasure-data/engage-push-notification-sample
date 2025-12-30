@@ -221,10 +221,12 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
             return
         }
 
+        let (campaignId, messageId) = extractCampaignInfo(from: userInfo)
+
         let event: [String: Any] = [
             "type": "delivery",
-            "campaign_id": userInfo["campaign_id"] as? String ?? "",
-            "message_id": userInfo["message_id"] as? String ?? "",
+            "campaign_id": campaignId,
+            "message_id": messageId,
             "platform": "ios",
             "fcm_token": Messaging.messaging().fcmToken ?? "",
             "time": TimeUtils.shared.getCurrentTimestamp()
@@ -240,10 +242,12 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
             return
         }
 
+        let (campaignId, messageId) = extractCampaignInfo(from: userInfo)
+
         let event: [String: Any] = [
             "type": "open",
-            "campaign_id": userInfo["campaign_id"] as? String ?? "",
-            "message_id": userInfo["message_id"] as? String ?? "",
+            "campaign_id": campaignId,
+            "message_id": messageId,
             "platform": "ios",
             "fcm_token": Messaging.messaging().fcmToken ?? "",
             "time": TimeUtils.shared.getCurrentTimestamp()
@@ -259,10 +263,12 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
             return
         }
 
+        let (campaignId, messageId) = extractCampaignInfo(from: userInfo)
+
         let event: [String: Any] = [
             "type": "dismiss",
-            "campaign_id": userInfo["campaign_id"] as? String ?? "",
-            "message_id": userInfo["message_id"] as? String ?? "",
+            "campaign_id": campaignId,
+            "message_id": messageId,
             "platform": "ios",
             "fcm_token": Messaging.messaging().fcmToken ?? "",
             "time": TimeUtils.shared.getCurrentTimestamp()
@@ -295,6 +301,8 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
             return
         }
 
+        let (campaignId, messageId) = extractCampaignInfo(from: userInfo)
+
         // Process deeplink field (backward compatibility)
         if let deepLinkField = userInfo["deeplink"] as? String, let url = URL(string: deepLinkField) {
             LogHelper.debug("Processing deeplink field: \(deepLinkField)")
@@ -304,9 +312,6 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
                     LogHelper.warning("Invalid deep link host: \(url.host ?? "nil")")
                     return
                 }
-
-                let campaignId = userInfo["campaign_id"] as? String ?? ""
-                let messageId = userInfo["message_id"] as? String ?? ""
 
                 // Track deep link open event
                 TrackingService.shared.trackDeepLinkOpenEvent(deepLink: deepLinkField, campaignId: campaignId, messageId: messageId)
@@ -367,9 +372,6 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
                     return
                 }
 
-                let campaignId = userInfo["campaign_id"] as? String ?? ""
-                let messageId = userInfo["message_id"] as? String ?? ""
-
                 // Track deep link open event
                 TrackingService.shared.trackDeepLinkOpenEvent(deepLink: linkField, campaignId: campaignId, messageId: messageId)
 
@@ -388,9 +390,6 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
             case "http", "https":
                 // Web link
                 LogHelper.debug("Link field contains web link")
-
-                let campaignId = userInfo["campaign_id"] as? String ?? ""
-                let messageId = userInfo["message_id"] as? String ?? ""
 
                 // Validate domain against allowlist
                 guard let host = url.host, allowedDomains.contains(host) else {
@@ -442,6 +441,26 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         LogHelper.debug("Fallback: Invalid link - staying at home screen")
         // App stays on home screen, no navigation occurs
         // The user sees the app in its default state
+    }
+
+    // MARK: - Helper Functions
+
+    /**
+     Extract campaign_id and message_id from userInfo with fallback support
+     - Parameter userInfo: Notification payload
+     - Returns: Tuple of (campaignId, messageId)
+     */
+    private func extractCampaignInfo(from userInfo: [AnyHashable: Any]) -> (String, String) {
+        // Try custom fields first, fallback to td_ prefixed fields, then empty string
+        let campaignId = userInfo["campaign_id"] as? String
+            ?? userInfo["td_campaign_id"] as? String
+            ?? ""
+
+        let messageId = userInfo["message_id"] as? String
+            ?? userInfo["td_message_id"] as? String
+            ?? ""
+
+        return (campaignId, messageId)
     }
 }
 

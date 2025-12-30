@@ -2,15 +2,12 @@
   "message": {
     "token": "DEVICE_FCM_TOKEN_HERE",
     "notification": {
-      "title": "Test Notification",
-      "body": "This is a test push notification from Treasure Data"
+      "title": "Special Sale!",
+      "body": "Get 50% off on selected items. Limited time offer!",
+      "image": "https://picsum.photos/400/300"
     },
     "data": {
-      "campaign_id": "test_campaign_001",
-      "message_id": "test_message_001",
-      "image": "https://picsum.photos/400/300",
-      "deeplink": "tdpushsample://product/12345",
-      "link": "https://www.treasuredata.com"
+      "link": "tdpushsample://product/12345"
     },
     "android": {
       "priority": "high"

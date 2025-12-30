@@ -76,16 +76,31 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         logDebug(TAG, "===============================================")
 
         // CUSTOMIZE: Extract notification data from FCM payload
-        // These field names should match what you send from Treasure Data Engage
-        val campaignId = message.data["campaign_id"] ?: ""
-        val messageId = message.data["message_id"] ?: ""
-        val title = message.data["title"]
-            ?: message.notification?.title
+        // Campaign and message IDs: prioritize custom fields, fallback to FCM messageId
+        val campaignId = message.data["campaign_id"]
+            ?: message.data["td_campaign_id"]
+            ?: ""
+        val messageId = message.data["message_id"]
+            ?: message.data["td_message_id"]
+            ?: message.messageId
+            ?: ""
+
+        // Title and body: prioritize notification object (standard FCM), fallback to data
+        val title = message.notification?.title
+            ?: message.data["title"]
             ?: getString(R.string.notification_default_title)
-        val body = message.data["body"] ?: message.notification?.body ?: ""
-        val imageUrl = message.data["image"]
-        val deepLink = message.data["deeplink"]
-        val webLink = message.data["link"]
+        val body = message.notification?.body
+            ?: message.data["body"]
+            ?: ""
+
+        // Image URL: prioritize notification.imageUrl (standard FCM), fallback to data
+        val imageUrl = message.notification?.imageUrl?.toString()
+            ?: message.data["image"]
+
+        // Link field: determine if it's a deeplink or web link based on scheme
+        val linkField = message.data["link"]
+            ?: message.data["deeplink"]
+        val (deepLink, webLink) = parseLinkField(linkField)
 
         logDebug(TAG, getString(R.string.log_campaign_id, campaignId))
         logDebug(TAG, getString(R.string.log_message_id, messageId))
@@ -247,6 +262,33 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
                 TreasureData.sharedInstance().addEvent(BuildConfig.TD_TABLE, event)
                 logDebug(TAG, getString(R.string.log_event_added, "Delivery"))
+            }
+        }
+    }
+
+    /**
+     * Parse link field and determine if it's a deeplink or web link
+     * @param linkField The link value from FCM payload
+     * @return Pair of (deepLink, webLink) - one will be non-null, the other null
+     */
+    private fun parseLinkField(linkField: String?): Pair<String?, String?> {
+        if (linkField.isNullOrBlank()) {
+            return Pair(null, null)
+        }
+
+        return when {
+            // Check if it's a web link (http or https)
+            linkField.startsWith("http://", ignoreCase = true) ||
+            linkField.startsWith("https://", ignoreCase = true) -> {
+                Pair(null, linkField)
+            }
+            // Check if it's a deeplink (custom scheme)
+            linkField.contains("://") -> {
+                Pair(linkField, null)
+            }
+            // Default: treat as deeplink if no scheme detected
+            else -> {
+                Pair(linkField, null)
             }
         }
     }
