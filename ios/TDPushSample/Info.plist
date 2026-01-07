@@ -16,10 +16,46 @@
 	<string>$(PRODUCT_BUNDLE_PACKAGE_TYPE)</string>
 	<key>CFBundleShortVersionString</key>
 	<string>1.0</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>com.treasuredata.pushsample</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>tdpushsample</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleVersion</key>
 	<string>1</string>
+	<key>FirebaseAppDelegateProxyEnabled</key>
+	<false/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>TDAllowedDeepLinkHosts</key>
+	<array>
+		<string>product</string>
+		<string>category</string>
+		<string>home</string>
+	</array>
+	<key>TDAllowedDomains</key>
+	<array>
+		<string>example.com</string>
+		<string>treasuredata.com</string>
+	</array>
+	<key>TDDatabase</key>
+	<string>mobile</string>
+	<key>TDDeepLinkScheme</key>
+	<string>tdpushsample</string>
+	<key>TDEndpoint</key>
+	<string>https://us01.records.in.treasuredata.com</string>
+	<key>TDTable</key>
+	<string>push_events</string>
+	<key>TDWriteKey</key>
+	<string>YOUR_TD_WRITE_KEY</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
@@ -37,6 +73,10 @@
 			</array>
 		</dict>
 	</dict>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIRequiredDeviceCapabilities</key>
@@ -55,46 +95,6 @@
 		<string>UIInterfaceOrientationPortraitUpsideDown</string>
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
-	</array>
-	<key>CFBundleURLTypes</key>
-	<array>
-		<dict>
-			<key>CFBundleTypeRole</key>
-			<string>Editor</string>
-			<key>CFBundleURLName</key>
-			<string>com.treasuredata.pushsample</string>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>tdpushsample</string>
-			</array>
-		</dict>
-	</array>
-	<key>UIBackgroundModes</key>
-	<array>
-		<string>remote-notification</string>
-	</array>
-	<key>FirebaseAppDelegateProxyEnabled</key>
-	<false/>
-	<key>TDWriteKey</key>
-	<string>YOUR_TD_WRITE_KEY</string>
-	<key>TDDatabase</key>
-	<string>mobile</string>
-	<key>TDTable</key>
-	<string>push_events</string>
-	<key>TDEndpoint</key>
-	<string>https://us01.records.in.treasuredata.com</string>
-	<key>TDDeepLinkScheme</key>
-	<string>tdpushsample</string>
-	<key>TDAllowedDomains</key>
-	<array>
-		<string>example.com</string>
-		<string>treasuredata.com</string>
-	</array>
-	<key>TDAllowedDeepLinkHosts</key>
-	<array>
-		<string>product</string>
-		<string>category</string>
-		<string>home</string>
 	</array>
 </dict>
 </plist>

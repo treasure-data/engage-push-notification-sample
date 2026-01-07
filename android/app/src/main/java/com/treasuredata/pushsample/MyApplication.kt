@@ -41,6 +41,7 @@ class MyApplication : Application() {
         TreasureData.sharedInstance().enableAutoAppendModelInformation()
         TreasureData.sharedInstance().enableAutoAppendAppInformation()
         TreasureData.sharedInstance().enableAutoAppendLocaleInformation()
+        TreasureData.sharedInstance().enableAutoAppendRecordUUID()
 
         logDebug(TAG, "Treasure Data SDK initialized")
         logDebug(TAG, "Database: ${BuildConfig.TD_DATABASE}")

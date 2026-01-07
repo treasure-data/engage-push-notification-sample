@@ -44,9 +44,30 @@ This sample app implements the following features:
 
 ## Setup Instructions
 
+### Prerequisites
+
+**Tools required for iOS development:**
+- **Xcode 15.0+ (Full version)**
+  - Install from [App Store](https://apps.apple.com/us/app/xcode/id497799835)
+  - ⚠️ Command Line Tools alone are insufficient (iOS Simulator unavailable)
+  - After installation, run:
+    ```bash
+    sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer
+    xcode-select -p  # Verify output is /Applications/Xcode.app/Contents/Developer
+    ```
+- **XcodeGen** (Project file generation tool)
+  ```bash
+  brew install xcodegen
+  ```
+
 ### iOS
 
 ```bash
+# 0. Generate Xcode project (first time only)
+cd ios
+xcodegen generate
+cd ..
+
 # 1. Place Firebase configuration file
 cp ios/TDPushSample/GoogleService-Info.plist.example ios/TDPushSample/GoogleService-Info.plist
 # Edit GoogleService-Info.plist with your actual Firebase configuration
@@ -57,13 +78,8 @@ cp ios/TDPushSample/GoogleService-Info.plist.example ios/TDPushSample/GoogleServ
 # - TDTable: push_events
 # - TDEndpoint: https://us01.records.in.treasuredata.com
 
-# 3. Install dependencies
-cd ios
-pod install
-cd ..
-
-# 4. Open project in Xcode
-open ios/TDPushSample.xcworkspace
+# 3. Open project in Xcode
+open ios/TDPushSample.xcodeproj
 ```
 
 **Xcode Configuration:**
@@ -71,6 +87,15 @@ open ios/TDPushSample.xcworkspace
 2. If changing Bundle Identifier, update URL Scheme in Info.plist as well
 3. Enable Capabilities > Push Notifications
 4. Enable Capabilities > Background Modes > Remote notifications
+5. **Swift Package Manager will automatically download dependencies on first build**
+   - Firebase Messaging (12.7.0+)
+   - Firebase Analytics (12.7.0+)
+   - Treasure Data iOS SDK (1.2.1+)
+
+**Note:**
+- This project uses **Swift Package Manager (SPM)**
+- CocoaPods is not used (open `.xcodeproj`, not `.xcworkspace`)
+- Dependencies are managed in `project.yml` and generated via XcodeGen
 
 ### Android
 

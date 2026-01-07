@@ -2,15 +2,25 @@
 .DS_Store
 
 # iOS
-ios/Pods/
-ios/*.xcworkspace/xcuserdata/
+# XcodeGen: .xcodeproj is generated from project.yml
+ios/*.xcodeproj/
+ios/*.xcworkspace/
+
+# Xcode user-specific files
 ios/*.xcodeproj/xcuserdata/
 ios/*.xcodeproj/project.xcworkspace/xcuserdata/
+ios/*.xcworkspace/xcuserdata/
+
+# Build artifacts
 ios/build/
 ios/DerivedData/
 *.ipa
 *.dSYM.zip
 *.dSYM
+
+# Swift Package Manager
+ios/.swiftpm/
+.build/
 
 # Firebase config (sensitive)
 ios/TDPushSample/GoogleService-Info.plist

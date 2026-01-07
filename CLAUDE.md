@@ -19,10 +19,12 @@
 - Test notification delivery using Firebase Console test messages
 
 ### No Direct Project File Edits
-- **DO NOT edit** `.xcodeproj`, `.pbxproj`, or Gradle files directly unless absolutely necessary
-- Use Swift Package Manager or CocoaPods for iOS dependencies
-- Use Gradle dependency declarations for Android
-- When adding new files, ensure they are properly registered in build system
+- **DO NOT edit** `.xcodeproj` or `.pbxproj` files directly
+- **iOS**: Use `project.yml` (XcodeGen) to manage project structure and Swift Package Manager for dependencies
+  - Run `xcodegen generate` to regenerate `.xcodeproj` after modifying `project.yml`
+  - Add SPM dependencies in the `packages` section of `project.yml`
+- **Android**: Use Gradle dependency declarations for Android
+- When adding new files, ensure they are properly registered in build system (`project.yml` for iOS, Gradle for Android)
 
 ### Configuration Management
 - **NEVER commit** API keys (`TD_WRITE_KEY`, Firebase keys) to Git
@@ -69,18 +71,18 @@
 
 ## 📦 DEPENDENCIES
 
-### iOS (Podfile or SPM)
-```ruby
-# Firebase
-pod 'Firebase/Messaging', '~> 12.7'
-pod 'Firebase/Analytics', '~> 12.7'
+### iOS (Swift Package Manager)
+This project uses **Swift Package Manager (SPM)** for dependency management.
 
-# Minimum iOS version
-platform :ios, '13.0'
-```
+**Package Dependencies (defined in project.yml):**
+- Firebase iOS SDK: `https://github.com/firebase/firebase-ios-sdk` (12.7.0+)
+  - FirebaseMessaging
+  - FirebaseAnalytics
+- Treasure Data iOS SDK: `https://github.com/treasure-data/td-ios-sdk` (1.2.1+)
 
-**Swift Package Manager Alternative:**
-- `https://github.com/firebase/firebase-ios-sdk` (12.7.0+)
+**Minimum iOS version**: 15.0 (required by Firebase 12.7+)
+
+**Note:** Dependencies are automatically resolved by Xcode on first build. No manual installation required.
 
 ### Android (build.gradle.kts)
 ```kotlin
@@ -109,26 +111,31 @@ dependencies {
 
 ### iOS Build Commands
 ```bash
-# Install dependencies (CocoaPods)
-cd ios && pod install && cd ..
+# Generate Xcode project (if project.yml was modified)
+cd ios && xcodegen generate && cd ..
 
-# Build for simulator
-xcodebuild -workspace ios/MyApp.xcworkspace \
-  -scheme MyApp \
+# Build for simulator (dependencies auto-resolve on first build)
+xcodebuild -project ios/TDPushSample.xcodeproj \
+  -scheme TDPushSample \
   -destination 'platform=iOS Simulator,name=iPhone 15' \
   clean build | xcbeautify
 
 # Run on simulator
 open -a Simulator
 xcrun simctl boot "iPhone 15"
-xcodebuild -workspace ios/MyApp.xcworkspace \
-  -scheme MyApp \
+xcodebuild -project ios/TDPushSample.xcodeproj \
+  -scheme TDPushSample \
   -destination 'platform=iOS Simulator,name=iPhone 15' \
   build
 
 # Test notification delivery (iOS 13+)
-xcrun simctl push booted com.example.myapp test-notification.apns
+xcrun simctl push booted com.treasuredata.pushsample shared/test-payloads/test-notification.apns
 ```
+
+**Note:**
+- This project uses **XcodeGen** to generate the Xcode project from `project.yml`
+- Swift Package Manager dependencies are resolved automatically by Xcode
+- No `pod install` required
 
 ### Android Build Commands
 ```bash
@@ -233,12 +240,18 @@ mobile-push-samples/
 ## 🧪 TESTING WORKFLOW
 
 ### Pre-Flight Checklist
-1. ✅ Firebase project created with iOS and Android apps registered
-2. ✅ `google-services.json` (Android) and `GoogleService-Info.plist` (iOS) downloaded
-3. ✅ APNs authentication key uploaded to Firebase Console (iOS)
-4. ✅ Treasure Data database and table created (`mobile.push_events`)
-5. ✅ Write-only API key obtained from Treasure Data
-6. ✅ `TD_WRITE_KEY` configured in app (not committed to Git)
+1. ✅ **Xcode (full version) installed** - Required for iOS development and testing
+   - Install from App Store: https://apps.apple.com/us/app/xcode/id497799835
+   - Command Line Tools alone are insufficient (no iOS Simulator)
+   - After install: `sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer`
+2. ✅ **XcodeGen installed** - Required for iOS project generation
+   - Install: `brew install xcodegen`
+3. ✅ Firebase project created with iOS and Android apps registered
+4. ✅ `google-services.json` (Android) and `GoogleService-Info.plist` (iOS) downloaded
+5. ✅ APNs authentication key uploaded to Firebase Console (iOS)
+6. ✅ Treasure Data database and table created (`mobile.push_events`)
+7. ✅ Write-only API key obtained from Treasure Data
+8. ✅ `TD_WRITE_KEY` configured in app (not committed to Git)
 
 ### iOS Testing Steps
 1. **Build and run** on simulator (iOS 13+)

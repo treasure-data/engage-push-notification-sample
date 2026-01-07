@@ -31,13 +31,16 @@ class FCMTokenService {
             return
         }
 
+        // REQUIRED: Device metadata is automatically added by TD SDK via:
+        // - enableAutoAppendModelInformation() -> td_device, td_model, td_os_ver, td_os_type
+        // - enableAutoAppendAppInformation() -> td_app_ver, td_app_ver_num
+        // - enableAutoAppendLocaleInformation() -> td_locale_country, td_locale_lang
+        // - enableAutoAppendUniqId() -> td_uuid
+        // - enableAutoAppendRecordUUID() -> record_uuid (per-event unique ID)
         var event: [String: Any] = [
             "type": "token_register",
             "fcm_token": token,
             "platform": "ios",
-            "app_version": Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "",
-            "os_version": UIDevice.current.systemVersion,
-            "device_model": UIDevice.current.model,
             "time": TimeUtils.shared.getCurrentTimestamp()
         ]
 

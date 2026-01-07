@@ -9,6 +9,9 @@
     "badge": 1,
     "mutable-content": 1
   },
-  "image": "https://picsum.photos/400/300",
-  "link": "tdpushsample://product/12345"
+  "campaign_id": "12345",
+  "message_id": "msg-001",
+  "deeplink": "tdpushsample://product/12345",
+  "link": "https://example.com/promo",
+  "image": "https://picsum.photos/400/300"
 }

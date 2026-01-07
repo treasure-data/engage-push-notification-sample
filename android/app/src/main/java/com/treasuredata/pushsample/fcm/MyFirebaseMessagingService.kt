@@ -97,10 +97,26 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         val imageUrl = message.notification?.imageUrl?.toString()
             ?: message.data["image"]
 
-        // Link field: determine if it's a deeplink or web link based on scheme
+        // Link fields: handle both deeplink and link separately if both exist
+        // Engage Studio may send both 'deeplink' and 'link' fields
+        val deeplinkField = message.data["deeplink"]
         val linkField = message.data["link"]
-            ?: message.data["deeplink"]
-        val (deepLink, webLink) = parseLinkField(linkField)
+
+        val (deepLink, webLink) = when {
+            deeplinkField != null && linkField != null -> {
+                // Both fields present: use deeplink as deep link, link as web link
+                Pair(deeplinkField, linkField)
+            }
+            deeplinkField != null -> {
+                // Only deeplink field: parse to determine type
+                parseLinkField(deeplinkField)
+            }
+            linkField != null -> {
+                // Only link field: parse to determine type
+                parseLinkField(linkField)
+            }
+            else -> Pair(null, null)
+        }
 
         logDebug(TAG, getString(R.string.log_campaign_id, campaignId))
         logDebug(TAG, getString(R.string.log_message_id, messageId))

@@ -63,19 +63,38 @@ adb logcat | grep "FCM"
 
 ### Method B: Direct Sending in iOS Simulator
 
+**Prerequisites:**
+- **Xcode (full version) must be installed**
+  - Install [Xcode](https://apps.apple.com/us/app/xcode/id497799835) from the App Store
+  - Command Line Tools alone are not sufficient
+  - After installation, set Xcode path:
+    ```bash
+    sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer
+    ```
+
 ```bash
-# 1. Launch simulator
+# 1. Verify Xcode developer tools path
+xcode-select -p
+# Expected output: /Applications/Xcode.app/Contents/Developer
+# If it shows /Library/Developer/CommandLineTools, run the command above
+
+# 2. Launch simulator
 open -a Simulator
+# Or check available simulators and boot:
+xcrun simctl list devices available
 xcrun simctl boot "iPhone 15"
 
-# 2. Build & install app (run from Xcode)
+# 3. Build & install app (run from Xcode)
+# Xcode > Product > Run (⌘R)
 
-# 3. Send test payload
+# 4. Send test payload
 xcrun simctl push booted com.treasuredata.pushsample \
   shared/test-payloads/test-notification.apns
 ```
 
-**Note:** Simulators cannot receive APNs notifications. The above command is a simulator-specific feature.
+**Note:**
+- Simulators cannot receive APNs notifications. The above command is a simulator-specific feature.
+- `xcrun simctl` commands require Xcode to be installed.
 
 ## 3. Confirming Notification Reception
 

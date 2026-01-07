@@ -1,28 +1,17 @@
 {
   "message": {
     "token": "DEVICE_FCM_TOKEN_HERE",
-    "notification": {
-      "title": "Special Sale!",
-      "body": "Get 50% off on selected items. Limited time offer!",
-      "image": "https://picsum.photos/400/300"
-    },
     "data": {
-      "link": "tdpushsample://product/12345"
+      "campaign_id": "12345",
+      "message_id": "msg-001",
+      "deeplink": "tdpushsample://product/12345",
+      "image": "https://picsum.photos/400/300",
+      "link": "https://example.com/promo",
+      "title": "Special Sale!",
+      "body": "Get 50% off on selected items. Limited time offer!"
     },
     "android": {
       "priority": "high"
-    },
-    "apns": {
-      "headers": {
-        "apns-priority": "10"
-      },
-      "payload": {
-        "aps": {
-          "sound": "default",
-          "badge": 1,
-          "mutable-content": 1
-        }
-      }
     }
   }
 }

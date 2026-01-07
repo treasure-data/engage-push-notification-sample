@@ -42,9 +42,30 @@
 
 ## セットアップ手順
 
+### 前提条件
+
+**iOS開発に必要なツール:**
+- **Xcode 15.0+（完全版）**
+  - [App Store](https://apps.apple.com/jp/app/xcode/id497799835)からインストール
+  - ⚠️ Command Line Toolsのみでは不可（iOSシミュレータが使えません）
+  - インストール後、以下を実行：
+    ```bash
+    sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer
+    xcode-select -p  # /Applications/Xcode.app/Contents/Developer と表示されることを確認
+    ```
+- **XcodeGen**（プロジェクトファイル生成ツール）
+  ```bash
+  brew install xcodegen
+  ```
+
 ### iOS
 
 ```bash
+# 0. Xcodeプロジェクトを生成（初回のみ）
+cd ios
+xcodegen generate
+cd ..
+
 # 1. Firebase設定ファイルを配置
 cp ios/TDPushSample/GoogleService-Info.plist.example ios/TDPushSample/GoogleService-Info.plist
 # GoogleService-Info.plist を編集して実際のFirebase設定を入力
@@ -55,13 +76,8 @@ cp ios/TDPushSample/GoogleService-Info.plist.example ios/TDPushSample/GoogleServ
 # - TDTable: push_events
 # - TDEndpoint: https://us01.records.in.treasuredata.com
 
-# 3. 依存関係をインストール
-cd ios
-pod install
-cd ..
-
-# 4. Xcodeでプロジェクトを開く
-open ios/TDPushSample.xcworkspace
+# 3. Xcodeでプロジェクトを開く
+open ios/TDPushSample.xcodeproj
 ```
 
 **Xcode設定:**
@@ -69,6 +85,15 @@ open ios/TDPushSample.xcworkspace
 2. Bundle Identifierを変更する場合は、Info.plistのURL Schemeも更新
 3. Capabilities > Push Notifications を有効化
 4. Capabilities > Background Modes > Remote notifications を有効化
+5. **初回ビルド時に自動的にSwift Package Managerが依存関係をダウンロードします**
+   - Firebase Messaging (12.7.0+)
+   - Firebase Analytics (12.7.0+)
+   - Treasure Data iOS SDK (1.2.1+)
+
+**注意:**
+- このプロジェクトは**Swift Package Manager (SPM)**を使用しています
+- CocoaPodsは使用していません（`.xcworkspace`ではなく`.xcodeproj`を開きます）
+- 依存関係は`project.yml`で管理され、XcodeGenで生成されます
 
 ### Android
 

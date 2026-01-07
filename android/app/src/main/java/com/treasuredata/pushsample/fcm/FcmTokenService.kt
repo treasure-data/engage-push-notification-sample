@@ -1,8 +1,6 @@
 package com.treasuredata.pushsample.fcm
 
 import android.content.Context
-import android.content.pm.PackageManager
-import android.os.Build
 import android.util.Log
 import com.google.firebase.messaging.FirebaseMessaging
 import com.treasuredata.android.TreasureData
@@ -31,13 +29,16 @@ object FcmTokenService {
     fun registerToken(context: Context, token: String) {
         logDebug(TAG, "Registering FCM token with Treasure Data: $token")
 
+        // REQUIRED: Device metadata is automatically added by TD SDK via:
+        // - enableAutoAppendModelInformation() -> td_device, td_model, td_os_ver, td_os_type
+        // - enableAutoAppendAppInformation() -> td_app_ver, td_app_ver_num
+        // - enableAutoAppendLocaleInformation() -> td_locale_country, td_locale_lang
+        // - enableAutoAppendUniqId() -> td_uuid
+        // - enableAutoAppendRecordUUID() -> record_uuid (per-event unique ID)
         val event = mutableMapOf<String, Any>(
             "type" to "token_register",
             "fcm_token" to token,
             "platform" to "android",
-            "app_version" to getAppVersion(context),
-            "os_version" to Build.VERSION.RELEASE,
-            "device_model" to "${Build.MANUFACTURER} ${Build.MODEL}",
             "time" to TimeUtils.getCurrentTimestamp()
         )
 
@@ -68,20 +69,6 @@ object FcmTokenService {
     private fun getUserId(context: Context): String? {
         val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
         return prefs.getString(KEY_USER_ID, null)
-    }
-
-    private fun getAppVersion(context: Context): String {
-        return try {
-            val packageInfo = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                context.packageManager.getPackageInfo(context.packageName, PackageManager.PackageInfoFlags.of(0))
-            } else {
-                @Suppress("DEPRECATION")
-                context.packageManager.getPackageInfo(context.packageName, 0)
-            }
-            packageInfo.versionName ?: "unknown"
-        } catch (e: Exception) {
-            "unknown"
-        }
     }
 
     // MARK: - Logging Helpers

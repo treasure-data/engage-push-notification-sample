@@ -1,0 +1,67 @@
+name: TDPushSample
+options:
+  bundleIdPrefix: com.treasuredata
+  deploymentTarget:
+    iOS: 15.0
+  createIntermediateGroups: true
+
+settings:
+  base:
+    DEVELOPMENT_TEAM: ""
+    PRODUCT_BUNDLE_IDENTIFIER: com.treasuredata.pushsample
+    MARKETING_VERSION: 1.0.0
+    CURRENT_PROJECT_VERSION: 1
+    IPHONEOS_DEPLOYMENT_TARGET: 15.0
+    SWIFT_VERSION: 5.0
+
+packages:
+  Firebase:
+    url: https://github.com/firebase/firebase-ios-sdk
+    majorVersion: 12.7.0
+  TreasureData:
+    url: https://github.com/treasure-data/td-ios-sdk
+    majorVersion: 1.2.1
+
+targets:
+  TDPushSample:
+    type: application
+    platform: iOS
+    sources:
+      - path: TDPushSample
+        excludes:
+          - "Info.plist"  # Only exclude Info.plist (handled separately by INFOPLIST_FILE)
+          - "GoogleService-Info.plist.example"  # Exclude example file
+        includes:
+          - "**/*.swift"
+          - "**/*.storyboard"
+          - "**/*.xib"
+          - "**/*.xcassets"
+          - "GoogleService-Info.plist"  # Explicitly include Firebase config
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.treasuredata.pushsample
+        INFOPLIST_FILE: TDPushSample/Info.plist
+    dependencies:
+      - target: NotificationService
+      - package: Firebase
+        product: FirebaseMessaging
+      - package: Firebase
+        product: FirebaseAnalytics
+      - package: TreasureData
+        product: TreasureData-iOS-SDK
+    scheme:
+      testTargets: []
+      gatherCoverageData: false
+
+  NotificationService:
+    type: app-extension
+    platform: iOS
+    sources:
+      - NotificationService
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.treasuredata.pushsample.NotificationService
+        INFOPLIST_FILE: NotificationService/Info.plist
+    dependencies:
+      - package: Firebase
+        product: FirebaseMessaging

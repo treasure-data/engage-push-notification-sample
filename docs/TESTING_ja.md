@@ -63,19 +63,38 @@ adb logcat | grep "FCM"
 
 ### 方法B: iOS Simulatorで直接送信
 
+**前提条件:**
+- **Xcode（完全版）がインストールされていること**
+  - App Storeから[Xcode](https://apps.apple.com/jp/app/xcode/id497799835)をインストール
+  - Command Line Toolsのみでは動作しません
+  - インストール後、以下を実行してXcodeのパスを設定：
+    ```bash
+    sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer
+    ```
+
 ```bash
-# 1. シミュレータを起動
+# 1. Xcodeの開発者ツールパスを確認
+xcode-select -p
+# 出力例: /Applications/Xcode.app/Contents/Developer
+# もし /Library/Developer/CommandLineTools と表示される場合は上記のコマンドを実行
+
+# 2. シミュレータを起動
 open -a Simulator
+# または利用可能なシミュレータを確認して起動:
+xcrun simctl list devices available
 xcrun simctl boot "iPhone 15"
 
-# 2. アプリをビルド＆インストール（Xcodeから実行）
+# 3. アプリをビルド＆インストール（Xcodeから実行）
+# Xcode > Product > Run (⌘R)
 
-# 3. テストペイロードを送信
+# 4. テストペイロードを送信
 xcrun simctl push booted com.treasuredata.pushsample \
   shared/test-payloads/test-notification.apns
 ```
 
-**注意:** シミュレータではAPNs経由の通知は受信できません。上記コマンドはシミュレータ専用機能です。
+**注意:**
+- シミュレータではAPNs経由の通知は受信できません。上記コマンドはシミュレータ専用機能です。
+- `xcrun simctl`コマンドはXcodeがインストールされている必要があります。
 
 ## 3. 通知受信の確認
 

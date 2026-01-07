@@ -44,6 +44,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             TreasureData.sharedInstance().enableAutoAppendModelInformation()
             TreasureData.sharedInstance().enableAutoAppendAppInformation()
             TreasureData.sharedInstance().enableAutoAppendLocaleInformation()
+            TreasureData.sharedInstance().enableAutoAppendRecordUUID()
 
             LogHelper.debug("Treasure Data SDK initialized")
             LogHelper.debug("Database: \(tdDatabase)")
@@ -133,7 +134,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
                     attachmentsArray.append([
                         "identifier": attachment.identifier,
                         "url": attachment.url.absoluteString,
-                        "type": attachment.type.identifier
+                        "type": attachment.type  // type is already a String
                     ])
                 }
                 payload["attachments"] = attachmentsArray
@@ -303,8 +304,14 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
 
         let (campaignId, messageId) = extractCampaignInfo(from: userInfo)
 
-        // Process deeplink field (backward compatibility)
-        if let deepLinkField = userInfo["deeplink"] as? String, let url = URL(string: deepLinkField) {
+        // Link fields: handle both deeplink and link separately if both exist
+        // Engage Studio may send both 'deeplink' and 'link' fields
+        // Priority: deeplink field takes precedence over link field
+        let deeplinkField = userInfo["deeplink"] as? String
+        let linkField = userInfo["link"] as? String
+
+        // Process deeplink field first (highest priority)
+        if let deepLinkField = deeplinkField, let url = URL(string: deepLinkField) {
             LogHelper.debug("Processing deeplink field: \(deepLinkField)")
             if url.scheme == deepLinkScheme {
                 // Validate deep link host against whitelist
@@ -327,13 +334,14 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
                         "message_id": messageId
                     ]
                 )
+                return  // Exit after processing deeplink field
             } else {
                 LogHelper.warning("Invalid deep link scheme in deeplink field: \(url.scheme ?? "nil")")
             }
         }
 
-        // Process link field - detect if it's a deep link or web link by URI scheme
-        if let linkField = userInfo["link"] as? String {
+        // Process link field only if deeplink field was not processed
+        if let linkField = linkField {
             LogHelper.debug("Found link field: \(linkField)")
 
             guard let url = URL(string: linkField) else {
