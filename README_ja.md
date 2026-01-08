@@ -163,24 +163,7 @@ xcrun simctl push booted com.treasuredata.pushsample shared/test-payloads/test-n
 
 ### 3. イベントデータの確認
 
-Treasure Data Consoleでクエリを実行：
-
-```sql
-SELECT
-  time,
-  type,
-  campaign_id,
-  message_id,
-  platform,
-  fcm_token,
-  user_id,
-  value,
-  reason
-FROM mobile.push_events
-WHERE time > td_time_add(now(), '-1h', 'JST')
-ORDER BY time DESC
-LIMIT 100
-```
+Treasure Data Consoleでイベントが正しく記録されていることを確認してください。
 
 ## イベントスキーマ
 

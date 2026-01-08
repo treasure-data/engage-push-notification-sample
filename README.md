@@ -165,24 +165,7 @@ xcrun simctl push booted com.treasuredata.pushsample shared/test-payloads/test-n
 
 ### 3. Verify Event Data
 
-Run query in Treasure Data Console:
-
-```sql
-SELECT
-  time,
-  type,
-  campaign_id,
-  message_id,
-  platform,
-  fcm_token,
-  user_id,
-  value,
-  reason
-FROM mobile.push_events
-WHERE time > td_time_add(now(), '-1h', 'JST')
-ORDER BY time DESC
-LIMIT 100
-```
+Check events in Treasure Data Console to verify they are being tracked correctly.
 
 ## Event Schema
 
