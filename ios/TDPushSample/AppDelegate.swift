@@ -86,10 +86,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func applicationDidEnterBackground(_ application: UIApplication) {
         // Upload any pending events when app enters background
-        TreasureData.sharedInstance().uploadEventsWithCallback({
+        TreasureData.sharedInstance().uploadEvents(callback: {
             LogHelper.debug("Background upload completed successfully")
         }, onError: { (code, message) in
-            LogHelper.error("Background upload failed - Code: \(code ?? "unknown"), Message: \(message ?? "unknown")")
+            LogHelper.error("Background upload failed - Code: \(code), Message: \(message)")
         })
     }
 
