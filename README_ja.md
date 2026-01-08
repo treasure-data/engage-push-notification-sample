@@ -173,7 +173,6 @@ Treasure Data Consoleでイベントが正しく記録されていることを�
 |-----------|------|------|
 | `type` | string | イベントタイプ（delivery, open, dismiss, link_open, deeplink_open, link_arrive, link_fail, token_register） |
 | `campaign_id` | string | キャンペーンID |
-| `message_id` | string | メッセージID |
 | `platform` | string | プラットフォーム（ios/android） |
 | `fcm_token` | string | FCMトークン |
 | `user_id` | string | ユーザーID（オプション） |

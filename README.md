@@ -175,7 +175,6 @@ All events include the following fields:
 |-------|------|-------------|
 | `type` | string | Event type (delivery, open, dismiss, link_open, deeplink_open, link_arrive, link_fail, token_register) |
 | `campaign_id` | string | Campaign ID |
-| `message_id` | string | Message ID |
 | `platform` | string | Platform (ios/android) |
 | `fcm_token` | string | FCM token |
 | `user_id` | string | User ID (optional) |
