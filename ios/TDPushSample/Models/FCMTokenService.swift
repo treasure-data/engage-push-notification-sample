@@ -51,6 +51,9 @@ class FCMTokenService {
 
         TreasureData.sharedInstance().addEvent(event, table: table)
         LogHelper.debug("Token registration event added to Treasure Data SDK")
+
+        // Upload events immediately (iOS SDK requires manual upload)
+        TreasureData.sharedInstance().uploadEvents()
     }
 
     // MARK: - User Association

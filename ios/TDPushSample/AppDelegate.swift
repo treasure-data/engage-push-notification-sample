@@ -84,6 +84,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         LogHelper.error("Failed to register for remote notifications", error: error)
     }
 
+    func applicationDidEnterBackground(_ application: UIApplication) {
+        // Upload any pending events when app enters background
+        TreasureData.sharedInstance().uploadEventsWithCallback({
+            LogHelper.debug("Background upload completed successfully")
+        }, onError: { (code, message) in
+            LogHelper.error("Background upload failed - Code: \(code ?? "unknown"), Message: \(message ?? "unknown")")
+        })
+    }
+
     // MARK: UISceneSession Lifecycle
 
     func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
@@ -235,6 +244,9 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
 
         TreasureData.sharedInstance().addEvent(event, table: table)
         LogHelper.debug("Delivery event added to Treasure Data SDK")
+
+        // Upload events immediately (iOS SDK requires manual upload)
+        TreasureData.sharedInstance().uploadEvents()
     }
 
     private func trackOpenEvent(userInfo: [AnyHashable: Any]) {
@@ -256,6 +268,9 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
 
         TreasureData.sharedInstance().addEvent(event, table: table)
         LogHelper.debug("Open event added to Treasure Data SDK")
+
+        // Upload events immediately (iOS SDK requires manual upload)
+        TreasureData.sharedInstance().uploadEvents()
     }
 
     private func trackDismissEvent(userInfo: [AnyHashable: Any]) {
@@ -277,6 +292,9 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
 
         TreasureData.sharedInstance().addEvent(event, table: table)
         LogHelper.debug("Dismiss event added to Treasure Data SDK")
+
+        // Upload events immediately (iOS SDK requires manual upload)
+        TreasureData.sharedInstance().uploadEvents()
     }
 
     // MARK: - Deep Link Handling

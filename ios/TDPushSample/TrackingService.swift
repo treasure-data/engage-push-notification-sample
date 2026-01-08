@@ -28,6 +28,9 @@ class TrackingService {
 
         TreasureData.sharedInstance().addEvent(event, table: table)
         LogHelper.debug("Link arrive event added to Treasure Data SDK")
+
+        // Upload events immediately (iOS SDK requires manual upload)
+        TreasureData.sharedInstance().uploadEvents()
     }
 
     func trackLinkFailEvent(link: String, campaignId: String, messageId: String, reason: String) {
@@ -49,6 +52,9 @@ class TrackingService {
 
         TreasureData.sharedInstance().addEvent(event, table: table)
         LogHelper.debug("Link fail event added to Treasure Data SDK - reason: \(reason)")
+
+        // Upload events immediately (iOS SDK requires manual upload)
+        TreasureData.sharedInstance().uploadEvents()
     }
 
     func trackDeepLinkOpenEvent(deepLink: String, campaignId: String, messageId: String) {
@@ -69,6 +75,9 @@ class TrackingService {
 
         TreasureData.sharedInstance().addEvent(event, table: table)
         LogHelper.debug("DeepLink open event added to Treasure Data SDK")
+
+        // Upload events immediately (iOS SDK requires manual upload)
+        TreasureData.sharedInstance().uploadEvents()
     }
 
     func trackWebLinkOpenEvent(webLink: String, campaignId: String, messageId: String) {
@@ -89,5 +98,8 @@ class TrackingService {
 
         TreasureData.sharedInstance().addEvent(event, table: table)
         LogHelper.debug("Link open event added to Treasure Data SDK")
+
+        // Upload events immediately (iOS SDK requires manual upload)
+        TreasureData.sharedInstance().uploadEvents()
     }
 }
