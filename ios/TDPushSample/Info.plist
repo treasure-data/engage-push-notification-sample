@@ -44,7 +44,7 @@
 	<key>TDAllowedDomains</key>
 	<array>
 		<string>example.com</string>
-		<string>treasuredata.com</string>
+		<string>www.treasuredata.com</string>
 	</array>
 	<key>TDDatabase</key>
 	<string>mobile</string>
