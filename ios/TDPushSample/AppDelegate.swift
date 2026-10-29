@@ -7,6 +7,10 @@ import TreasureData_iOS_SDK
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
+    private weak var notificationScene: SceneDelegate?
+    private var pendingNotificationTaps: [[AnyHashable: Any]] = []
+    private var handledNotificationResponses: Set<String> = []
+
     // Load allowlists from Info.plist
     private lazy var allowedDeepLinkHosts: Set<String> = {
         guard let hosts = Bundle.main.object(forInfoDictionaryKey: "TDAllowedDeepLinkHosts") as? [String] else {
@@ -38,8 +42,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             TreasureData.initialize(withApiKey: tdWriteKey, apiEndpoint: tdEndpoint)
             TreasureData.sharedInstance().defaultDatabase = tdDatabase
 
-            // Enable automatic data collection
-            // These methods automatically append useful information to all events
+            // Append device, app, locale, and record metadata to every event.
             TreasureData.sharedInstance().enableAutoAppendUniqId()
             TreasureData.sharedInstance().enableAutoAppendModelInformation()
             TreasureData.sharedInstance().enableAutoAppendAppInformation()
@@ -58,6 +61,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         // Request notification permissions
         UNUserNotificationCenter.current().delegate = self
+        // Engage Studio sets aps.category to default; dismiss callbacks require this option.
+        let defaultCategory = UNNotificationCategory(
+            identifier: "default",
+            actions: [],
+            intentIdentifiers: [],
+            options: [.customDismissAction]
+        )
+        UNUserNotificationCenter.current().setNotificationCategories([defaultCategory])
         let authOptions: UNAuthorizationOptions = [.alert, .badge, .sound]
         UNUserNotificationCenter.current().requestAuthorization(options: authOptions) { granted, error in
             if let error = error {
@@ -76,12 +87,25 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        // Firebase method swizzling is disabled, so pass the APNs token to Messaging explicitly.
         Messaging.messaging().apnsToken = deviceToken
         LogHelper.debug("APNs token registered")
     }
 
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
         LogHelper.error("Failed to register for remote notifications", error: error)
+    }
+
+    func application(
+        _ application: UIApplication,
+        didReceiveRemoteNotification userInfo: [AnyHashable: Any],
+        fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void
+    ) {
+        // Foreground delivery is tracked in willPresent; background execution is best-effort.
+        if application.applicationState != .active {
+            trackDeliveryEvent(userInfo: userInfo)
+        }
+        completionHandler(.newData)
     }
 
     func applicationDidEnterBackground(_ application: UIApplication) {
@@ -110,7 +134,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         let userInfo = notification.request.content.userInfo
         let content = notification.request.content
 
-        // Log complete notification payload as JSON
+        // Log notification content and metadata for debugging.
         LogHelper.debug("========== Notification Payload (Foreground - JSON) ==========")
         do {
             var payload: [String: Any] = [
@@ -125,7 +149,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
                 "launchImageName": content.launchImageName
             ]
 
-            // Add userInfo
+            // Stringify userInfo values for diagnostic logging.
             if !userInfo.isEmpty {
                 var userInfoDict: [String: Any] = [:]
                 for (key, value) in userInfo {
@@ -143,7 +167,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
                     attachmentsArray.append([
                         "identifier": attachment.identifier,
                         "url": attachment.url.absoluteString,
-                        "type": attachment.type  // type is already a String
+                        "type": attachment.type
                     ])
                 }
                 payload["attachments"] = attachmentsArray
@@ -167,14 +191,25 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         completionHandler([[.banner, .sound, .badge]])
     }
 
-    // Handle notification tap
+    // Handle notification taps and dismissals.
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+
+        // UIKit navigation and response deduplication share the main queue with Scene callbacks.
+        DispatchQueue.main.async {
+            self.handleNotificationResponse(response)
+            completionHandler()
+        }
+    }
+
+    func handleNotificationResponse(_ response: UNNotificationResponse) {
+        let responseKey = response.notification.request.identifier + ":" + response.actionIdentifier
+        guard handledNotificationResponses.insert(responseKey).inserted else { return }
 
         let userInfo = response.notification.request.content.userInfo
         let content = response.notification.request.content
 
-        // Log complete notification payload as JSON
-        LogHelper.debug("========== Notification Payload (Tapped - JSON) ==========")
+        // Log the notification content and the user's action for debugging.
+        LogHelper.debug("========== Notification Payload (Response - JSON) ==========")
         do {
             var payload: [String: Any] = [
                 "actionIdentifier": response.actionIdentifier,
@@ -186,7 +221,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
                 "body": content.body
             ]
 
-            // Add userInfo
+            // Stringify userInfo values for diagnostic logging.
             if !userInfo.isEmpty {
                 var userInfoDict: [String: Any] = [:]
                 for (key, value) in userInfo {
@@ -210,7 +245,12 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         case UNNotificationDefaultActionIdentifier:
             // User tapped the notification
             trackOpenEvent(userInfo: userInfo)
-            handleNotificationTap(userInfo: userInfo)
+            // A cold-start response can arrive before the Scene is ready to present a screen.
+            if notificationScene?.window?.windowScene?.activationState == .foregroundActive {
+                handleNotificationTap(userInfo: userInfo)
+            } else {
+                pendingNotificationTaps.append(userInfo)
+            }
 
         case UNNotificationDismissActionIdentifier:
             // User dismissed the notification
@@ -219,8 +259,15 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         default:
             break
         }
+    }
 
-        completionHandler()
+    func notificationSceneDidBecomeActive(_ scene: SceneDelegate) {
+        notificationScene = scene
+        let pendingTaps = pendingNotificationTaps
+        pendingNotificationTaps.removeAll()
+        for userInfo in pendingTaps {
+            handleNotificationTap(userInfo: userInfo)
+        }
     }
 
     // MARK: - Event Tracking
@@ -231,7 +278,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
             return
         }
 
-        let (campaignId, messageId) = extractCampaignInfo(from: userInfo)
+        let (campaignId, messageId) = extractCampaignAndMessageIDs(from: userInfo)
 
         let event: [String: Any] = [
             "type": "delivery",
@@ -245,7 +292,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         TreasureData.sharedInstance().addEvent(event, table: table)
         LogHelper.debug("Delivery event added to Treasure Data SDK")
 
-        // Upload events immediately (iOS SDK requires manual upload)
+        // addEvent queues locally; request an upload during the notification callback.
         TreasureData.sharedInstance().uploadEvents()
     }
 
@@ -255,7 +302,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
             return
         }
 
-        let (campaignId, messageId) = extractCampaignInfo(from: userInfo)
+        let (campaignId, messageId) = extractCampaignAndMessageIDs(from: userInfo)
 
         let event: [String: Any] = [
             "type": "open",
@@ -269,7 +316,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         TreasureData.sharedInstance().addEvent(event, table: table)
         LogHelper.debug("Open event added to Treasure Data SDK")
 
-        // Upload events immediately (iOS SDK requires manual upload)
+        // addEvent queues locally; request an upload during the notification callback.
         TreasureData.sharedInstance().uploadEvents()
     }
 
@@ -279,7 +326,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
             return
         }
 
-        let (campaignId, messageId) = extractCampaignInfo(from: userInfo)
+        let (campaignId, messageId) = extractCampaignAndMessageIDs(from: userInfo)
 
         let event: [String: Any] = [
             "type": "dismiss",
@@ -293,7 +340,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         TreasureData.sharedInstance().addEvent(event, table: table)
         LogHelper.debug("Dismiss event added to Treasure Data SDK")
 
-        // Upload events immediately (iOS SDK requires manual upload)
+        // addEvent queues locally; request an upload during the notification callback.
         TreasureData.sharedInstance().uploadEvents()
     }
 
@@ -314,177 +361,78 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
             LogHelper.error("Error formatting userInfo as JSON", error: error)
         }
 
-        // Get configured deep link scheme from Info.plist
-        guard let deepLinkScheme = Bundle.main.object(forInfoDictionaryKey: "TDDeepLinkScheme") as? String else {
+        guard let configuredDeepLinkScheme = Bundle.main.object(forInfoDictionaryKey: "TDDeepLinkScheme") as? String else {
             LogHelper.error("TDDeepLinkScheme not configured in Info.plist")
             return
         }
 
-        let (campaignId, messageId) = extractCampaignInfo(from: userInfo)
+        let deepLinkScheme = configuredDeepLinkScheme.lowercased()
+        let (campaignId, messageId) = extractCampaignAndMessageIDs(from: userInfo)
 
-        // Link fields: handle both deeplink and link separately if both exist
-        // Engage Studio may send both 'deeplink' and 'link' fields
-        // Priority: deeplink field takes precedence over link field
-        let deeplinkField = userInfo["deeplink"] as? String
-        let linkField = userInfo["link"] as? String
-
-        // Process deeplink field first (highest priority)
-        if let deepLinkField = deeplinkField, let url = URL(string: deepLinkField) {
-            LogHelper.debug("Processing deeplink field: \(deepLinkField)")
-            if url.scheme == deepLinkScheme {
-                // Validate deep link host against whitelist
-                guard let host = url.host, allowedDeepLinkHosts.contains(host) else {
-                    LogHelper.warning("Invalid deep link host: \(url.host ?? "nil")")
-                    return
-                }
-
-                // Track deep link open event
-                TrackingService.shared.trackDeepLinkOpenEvent(deepLink: deepLinkField, campaignId: campaignId, messageId: messageId)
-
-                // Navigate to deep link (handled in SceneDelegate) - pass campaign data for tracking
-                NotificationCenter.default.post(
-                    name: NSNotification.Name("OpenDeepLink"),
-                    object: nil,
-                    userInfo: [
-                        "url": url,
-                        "deepLink": deepLinkField,
-                        "campaign_id": campaignId,
-                        "message_id": messageId
-                    ]
-                )
-                return  // Exit after processing deeplink field
-            } else {
-                LogHelper.warning("Invalid deep link scheme in deeplink field: \(url.scheme ?? "nil")")
-            }
+        // Engage Studio uses link for both web URLs and deep links; Open app omits it.
+        guard let link = userInfo["link"] as? String else {
+            LogHelper.debug("No link field found in userInfo")
+            return
         }
 
-        // Process link field only if deeplink field was not processed
-        if let linkField = linkField {
-            LogHelper.debug("Found link field: \(linkField)")
+        guard let url = URL(string: link), let scheme = url.scheme?.lowercased() else {
+            LogHelper.error("Failed to parse link field URL: \(link)")
+            return
+        }
 
-            guard let url = URL(string: linkField) else {
-                LogHelper.error("Failed to parse link field URL: \(linkField)")
+        LogHelper.debug("Processing link field (scheme: \(scheme))")
+
+        switch scheme {
+        case deepLinkScheme:
+            guard let host = url.host, allowedDeepLinkHosts.contains(host) else {
+                LogHelper.warning("Invalid deep link host: \(url.host ?? "nil")")
                 return
             }
 
-            let scheme = url.scheme?.lowercased()
+            TrackingService.shared.trackDeepLinkOpenEvent(deepLink: link, campaignId: campaignId, messageId: messageId)
+            // Pass attribution to the Scene for destination events.
+            notificationScene?.handleDeepLink(
+                url: url, deepLink: link, campaignId: campaignId, messageId: messageId
+            )
 
-            // Log URL details as JSON
-            do {
-                let urlInfo: [String: Any] = [
-                    "url": url.absoluteString,
-                    "scheme": url.scheme ?? NSNull(),
-                    "host": url.host ?? NSNull(),
-                    "path": url.path
-                ]
-                let jsonData = try JSONSerialization.data(withJSONObject: urlInfo, options: .prettyPrinted)
-                if let jsonString = String(data: jsonData, encoding: .utf8) {
-                    LogHelper.debug("Parsed link field URL (JSON):\n\(jsonString)")
-                }
-            } catch {
-                LogHelper.error("Error formatting URL as JSON", error: error)
+        case "http", "https":
+            guard let host = url.host, allowedDomains.contains(host) else {
+                LogHelper.warning("Domain not in allowlist: \(url.host ?? "nil") (allowed: \(allowedDomains.joined(separator: ", ")))")
+                TrackingService.shared.trackLinkFailEvent(link: link, campaignId: campaignId, messageId: messageId, reason: "domain_not_allowed")
+                return
             }
 
-            LogHelper.debug("Processing link field (scheme: \(scheme ?? "nil"))")
-
-            switch scheme {
-            case deepLinkScheme:
-                // Deep link
-                LogHelper.debug("Link field contains deep link")
-
-                // Validate deep link host against whitelist
-                guard let host = url.host, allowedDeepLinkHosts.contains(host) else {
-                    LogHelper.warning("Invalid deep link host: \(url.host ?? "nil")")
-                    return
-                }
-
-                // Track deep link open event
-                TrackingService.shared.trackDeepLinkOpenEvent(deepLink: linkField, campaignId: campaignId, messageId: messageId)
-
-                // Navigate to deep link (handled in SceneDelegate) - pass campaign data for tracking
-                NotificationCenter.default.post(
-                    name: NSNotification.Name("OpenDeepLink"),
-                    object: nil,
-                    userInfo: [
-                        "url": url,
-                        "deepLink": linkField,
-                        "campaign_id": campaignId,
-                        "message_id": messageId
-                    ]
-                )
-
-            case "http", "https":
-                // Web link
-                LogHelper.debug("Link field contains web link")
-
-                // Validate domain against allowlist
-                guard let host = url.host, allowedDomains.contains(host) else {
-                    LogHelper.warning("Domain not in allowlist: \(url.host ?? "nil") (allowed: \(allowedDomains.joined(separator: ", ")))")
-                    TrackingService.shared.trackLinkFailEvent(link: linkField, campaignId: campaignId, messageId: messageId, reason: "domain_not_allowed")
-                    fallbackToHome()
-                    return
-                }
-
-                // Track link open event
-                TrackingService.shared.trackWebLinkOpenEvent(webLink: linkField, campaignId: campaignId, messageId: messageId)
-
-                // Open in Safari
-                if UIApplication.shared.canOpenURL(url) {
-                    LogHelper.debug("Opening URL in Safari: \(url)")
-                    UIApplication.shared.open(url, options: [:]) { success in
-                        if success {
-                            LogHelper.debug("Successfully opened URL in Safari")
-                            // Track successful arrival
-                            TrackingService.shared.trackLinkArriveEvent(link: linkField, campaignId: campaignId, messageId: messageId)
-                        } else {
-                            LogHelper.error("Failed to open URL in Safari")
-                            TrackingService.shared.trackLinkFailEvent(link: linkField, campaignId: campaignId, messageId: messageId, reason: "browser_open_failed")
-                            self.fallbackToHome()
-                        }
+            TrackingService.shared.trackWebLinkOpenEvent(webLink: link, campaignId: campaignId, messageId: messageId)
+            if UIApplication.shared.canOpenURL(url) {
+                UIApplication.shared.open(url, options: [:]) { success in
+                    if success {
+                        LogHelper.debug("Successfully opened URL in Safari")
+                        // Records a successful URL handoff; page loading is outside this callback.
+                        TrackingService.shared.trackLinkArriveEvent(link: link, campaignId: campaignId, messageId: messageId)
+                    } else {
+                        LogHelper.error("Failed to open URL in Safari")
+                        TrackingService.shared.trackLinkFailEvent(link: link, campaignId: campaignId, messageId: messageId, reason: "browser_open_failed")
                     }
-                } else {
-                    LogHelper.error("Cannot open URL (canOpenURL returned false): \(url)")
-                    TrackingService.shared.trackLinkFailEvent(link: linkField, campaignId: campaignId, messageId: messageId, reason: "browser_open_failed")
-                    fallbackToHome()
                 }
-
-            default:
-                LogHelper.warning("Unknown URI scheme in link field: \(scheme ?? "nil")")
+            } else {
+                LogHelper.error("Cannot open URL (canOpenURL returned false): \(url)")
+                TrackingService.shared.trackLinkFailEvent(link: link, campaignId: campaignId, messageId: messageId, reason: "browser_open_failed")
             }
-        }
 
-        // Log if no links were found
-        if userInfo["deeplink"] == nil && userInfo["link"] == nil {
-            LogHelper.debug("No deeplink or link field found in userInfo")
+        default:
+            LogHelper.warning("Unknown URI scheme in link field: \(scheme)")
         }
 
         LogHelper.debug("===========================================")
     }
 
-    // MARK: - Fallback Strategy
-
-    private func fallbackToHome() {
-        LogHelper.debug("Fallback: Invalid link - staying at home screen")
-        // App stays on home screen, no navigation occurs
-        // The user sees the app in its default state
-    }
-
     // MARK: - Helper Functions
 
-    /**
-     Extract campaign_id and message_id from userInfo with fallback support
-     - Parameter userInfo: Notification payload
-     - Returns: Tuple of (campaignId, messageId)
-     */
-    private func extractCampaignInfo(from userInfo: [AnyHashable: Any]) -> (String, String) {
-        // Try custom fields first, fallback to td_ prefixed fields, then empty string
-        let campaignId = userInfo["campaign_id"] as? String
-            ?? userInfo["td_campaign_id"] as? String
-            ?? ""
-
-        let messageId = userInfo["message_id"] as? String
-            ?? userInfo["td_message_id"] as? String
-            ?? ""
+    // Engage Studio supplies tdCampaignId; FCM adds gcm.message_id at the userInfo root.
+    // simctl push does not add an FCM message ID.
+    private func extractCampaignAndMessageIDs(from userInfo: [AnyHashable: Any]) -> (String, String) {
+        let campaignId = userInfo["tdCampaignId"] as? String ?? ""
+        let messageId = userInfo["gcm.message_id"] as? String ?? ""
 
         return (campaignId, messageId)
     }

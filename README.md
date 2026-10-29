@@ -20,7 +20,7 @@ This sample app implements the following features:
 
 ## Supported Platforms
 
-- **iOS**: 13.0 and above
+- **iOS**: 15.0 and above
 - **Android**: 8.0 and above (API 26)
 
 ## Prerequisites
@@ -47,7 +47,8 @@ This sample app implements the following features:
 ### Prerequisites
 
 **Tools required for iOS development:**
-- **Xcode 15.0+ (Full version)**
+- macOS 14.5 or later
+- **Xcode 16.2+ (Full version)**
   - Install from [App Store](https://apps.apple.com/us/app/xcode/id497799835)
   - ⚠️ Command Line Tools alone are insufficient (iOS Simulator unavailable)
   - After installation, run:
@@ -139,13 +140,29 @@ adb logcat | grep "FCM token"
 
 ### 2. Send Test Notification
 
-#### Send from Firebase Console (Easy)
+#### Android
 
-1. Firebase Console > Cloud Messaging > New Campaign > Notifications
-2. Enter notification text
-3. Test message > Enter FCM token > Test
+##### Test Engage Studio delivery
 
-#### Send from Command Line (Recommended)
+1. Run the app on an Android device or emulator with Google Play Services and allow notifications.
+2. Get the app's current FCM registration token from Logcat.
+3. In Engage Studio, open a Mobile Push campaign and select the **Campaign Content** tab.
+4. Click **Create mobile push notification**, or **Edit** for existing content. The **Mobile Push Notification Editor** opens.
+5. Under **Mobile push authentication**, select the authentication configured for the app's Firebase project.
+6. Enter **Title** and **Message**. To test images or tap behavior, configure **Image** and **On click behavior**.
+7. Click **Send test**.
+8. Enter the token in **Test device token**.
+9. Click **Send**.
+
+Check the received payload and notification. Repeat the test with the app in the foreground and in the background.
+
+#### iOS
+
+##### Test Engage Studio delivery
+
+Follow the [iOS device test steps](docs/TESTING.md#send-an-engage-studio-test-on-a-physical-device) to verify campaign delivery, tap behavior, and event tracking on a physical device.
+
+##### Send a local test payload on iOS Simulator
 
 **iOS Simulator:**
 ```bash
@@ -157,15 +174,17 @@ xcrun simctl boot "iPhone 15"
 xcrun simctl push booted com.treasuredata.pushsample shared/test-payloads/test-notification.apns
 ```
 
-**Android:**
-```bash
-# Use Firebase Admin SDK or curl (requires Server Key)
-# See docs/TESTING.md for details
-```
+#### Test Payload Files
+
+| Method | Fixture |
+|--------|---------|
+| iOS Simulator, `simctl push` | `shared/test-payloads/test-notification.apns` |
+
+See the [Testing Guide](docs/TESTING.md#test-payload-files) for local payload variations. Use Engage Studio **Send test** to verify campaign delivery on a device.
 
 ### 3. Verify Event Data
 
-Check events in Treasure Data Console to verify they are being tracked correctly.
+After testing with Engage Studio, check events in Treasure Data Console to verify they are being tracked correctly.
 
 ## Event Schema
 

@@ -16,7 +16,7 @@
 - **NEVER assume code works** - ALWAYS run build commands after changes
 - After modifying Firebase configuration, run the app on simulator/emulator to verify FCM token generation
 - If build fails, analyze error logs, fix the issue, and rebuild immediately
-- Test notification delivery using Firebase Console test messages
+- Test notification delivery using Engage Studio **Send test**
 
 ### No Direct Project File Edits
 - **DO NOT edit** `.xcodeproj` or `.pbxproj` files directly
@@ -212,8 +212,7 @@ mobile-push-samples/
 │   └── Podfile
 ├── shared/                         # Shared assets and configs
 │   ├── test-payloads/
-│   │   ├── test-notification.apns  # iOS test payload
-│   │   └── test-notification.json  # Android test payload
+│   │   └── test-notification.apns  # iOS Simulator local notification payload
 │   └── images/
 ├── docs/                           # Additional documentation
 │   ├── SETUP.md
@@ -254,10 +253,10 @@ mobile-push-samples/
 8. ✅ `TD_WRITE_KEY` configured in app (not committed to Git)
 
 ### iOS Testing Steps
-1. **Build and run** on simulator (iOS 13+)
+1. **Build and run** on a physical iOS device
 2. **Check logs** for FCM token: `print("FCM token: \(token)")`
-3. **Send test notification** via Firebase Console > Cloud Messaging
-4. **Verify notification** appears on simulator
+3. **Send test notification** via Engage Studio **Send test** with the current FCM token
+4. **Verify notification** appears on the device
 5. **Tap notification** and verify deep link opens
 6. **Query Treasure Data** to confirm events:
    ```sql
@@ -269,7 +268,7 @@ mobile-push-samples/
 ### Android Testing Steps
 1. **Build and install** on emulator/device: `./gradlew installDebug`
 2. **Check logcat** for FCM token: `adb logcat | grep "FCM token"`
-3. **Send test notification** via Firebase Console
+3. **Send test notification** via Engage Studio **Send test** with the current FCM token
 4. **Verify notification** appears in system tray
 5. **Tap notification** and verify deep link opens
 6. **Query Treasure Data** to confirm events uploaded

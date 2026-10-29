@@ -18,7 +18,7 @@
 
 ## 対応プラットフォーム
 
-- **iOS**: 13.0以上
+- **iOS**: 15.0以上
 - **Android**: 8.0以上（API 26）
 
 ## 必要な準備
@@ -45,7 +45,8 @@
 ### 前提条件
 
 **iOS開発に必要なツール:**
-- **Xcode 15.0+（完全版）**
+- macOS 14.5以上
+- **Xcode 16.2+（完全版）**
   - [App Store](https://apps.apple.com/jp/app/xcode/id497799835)からインストール
   - ⚠️ Command Line Toolsのみでは不可（iOSシミュレータが使えません）
   - インストール後、以下を実行：
@@ -137,13 +138,29 @@ adb logcat | grep "FCM token"
 
 ### 2. テスト通知の送信
 
-#### Firebase Consoleから送信（簡単）
+#### Android
 
-1. Firebase Console > Cloud Messaging > 新しいキャンペーン > Notifications
-2. 通知テキストを入力
-3. テストメッセージ > FCMトークンを入力 > テスト
+##### Engage Studioのテストを送信
 
-#### コマンドラインから送信（推奨）
+1. Google Play Servicesを搭載したAndroid端末またはエミュレーターでアプリを実行し、通知を許可します。
+2. Logcatからアプリの現在のFCM registration tokenを取得します。
+3. Engage StudioでMobile Push campaignを開き、**キャンペーンコンテンツ**タブを選択します。
+4. **モバイルプッシュ通知を新規作成**をクリックします。既存のコンテンツがある場合は**編集**をクリックします。**モバイルプッシュ通知エディタ**が開きます。
+5. **モバイルプッシュ認証**で、アプリのFirebaseプロジェクトに対応する認証を選択します。
+6. **タイトル**と**メッセージ**を入力します。画像やタップ時の動作をテストする場合は、**画像**と**クリック時の動作**を設定します。
+7. **テスト送信**をクリックします。
+8. **テストデバイストークン**にtokenを入力します。
+9. **送信**をクリックします。
+
+受信したpayloadと通知を確認します。アプリをforegroundにした状態とbackgroundにした状態で、それぞれテストを繰り返します。
+
+#### iOS
+
+##### Engage Studioの配信をテスト
+
+[iOS実機のテスト手順](docs/TESTING_ja.md#ios実機でengage-studioのテストを送信)に従い、実機でcampaign配信、タップ時の動作、event trackingを確認します。
+
+##### Simulatorでローカルのテストpayloadを送信
 
 **iOS Simulator:**
 ```bash
@@ -155,15 +172,17 @@ xcrun simctl boot "iPhone 15"
 xcrun simctl push booted com.treasuredata.pushsample shared/test-payloads/test-notification.apns
 ```
 
-**Android:**
-```bash
-# Firebase Admin SDK またはcurlを使用（Server Keyが必要）
-# 詳細はdocs/TESTING.mdを参照
-```
+#### テストpayloadファイル
+
+| 方法 | Fixture |
+|------|---------|
+| iOS Simulatorへの`simctl push` | `shared/test-payloads/test-notification.apns` |
+
+ローカルのpayloadの変更方法は、[テストガイド](docs/TESTING_ja.md#テストpayloadファイル)を参照してください。端末へのcampaign配信は、Engage Studioの**Send test**で確認します。
 
 ### 3. イベントデータの確認
 
-Treasure Data Consoleでイベントが正しく記録されていることを確認してください。
+Engage Studioでテストした後、Treasure Data Consoleでイベントが記録されていることを確認してください。
 
 ## イベントスキーマ
 

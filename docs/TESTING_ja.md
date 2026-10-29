@@ -17,8 +17,8 @@
 ```bash
 # Xcodeでアプリを実行し、コンソールを確認
 # 以下のようなログが表示されます:
-✅ Firebase initialized
-📱 APNs token registered
+Firebase initialized
+APNs token registered
 🔑 FCM token: dXkz8H...（長い文字列）
 ```
 
@@ -32,36 +32,45 @@ adb logcat -c  # ログをクリア
 adb logcat | grep "FCM"
 
 # 以下のようなログが表示されます:
-✅ Firebase initialized
-🔑 FCM token: dXkz8H...（長い文字列）
+Firebase initialized
+FCM token: dXkz8H...（長い文字列）
 ```
 
 ## 2. テスト通知の送信方法
 
-### 方法A: Firebase Consoleから送信（最も簡単）
+### Android
 
-1. [Firebase Console](https://console.firebase.google.com/)を開く
-2. プロジェクト > Cloud Messaging > 「新しいキャンペーン」 > 「Notifications」
-3. 通知の内容を入力：
-   - **通知のタイトル**: Test Notification
-   - **通知テキスト**: This is a test push notification
-4. 「次へ」をクリック
-5. 「テストメッセージを送信」をクリック
-6. FCMトークンを入力してテスト送信
+#### Engage Studioのテストを送信
 
-**カスタムデータを追加するには:**
-1. 「追加オプション」を展開
-2. 「カスタムデータ」セクションで以下を追加：
+1. Google Play Servicesを搭載したAndroid端末またはエミュレーターでアプリを実行し、通知を許可します。
+2. Logcatからアプリの現在のFCM registration tokenを取得します。
+3. Engage StudioでMobile Push campaignを開き、**キャンペーンコンテンツ**タブを選択します。
+4. **モバイルプッシュ通知を新規作成**をクリックします。既存のコンテンツがある場合は**編集**をクリックします。**モバイルプッシュ通知エディタ**が開きます。
+5. **モバイルプッシュ認証**で、アプリのFirebaseプロジェクトに対応する認証を選択します。
+6. **タイトル**と**メッセージ**を入力します。画像やタップ時の動作をテストする場合は、**画像**と**クリック時の動作**を設定します。
+7. **テスト送信**をクリックします。
+8. **テストデバイストークン**にtokenを入力します。
+9. **送信**をクリックします。
 
-| キー | 値 |
-|------|-----|
-| campaign_id | test_campaign_001 |
-| message_id | test_message_001 |
-| image | https://picsum.photos/400/300 |
-| deeplink | tdpushsample://product/12345 |
-| link | https://www.treasuredata.com |
+Logcatで受信したFCM data payloadと通知表示を確認します。アプリをforegroundにした状態とbackgroundにした状態で、それぞれテストを繰り返します。[Section 5](#5-treasure-dataへのイベント送信確認)に従い、`delivery`イベントを確認します。
 
-### 方法B: iOS Simulatorで直接送信
+### iOS
+
+#### iOS実機でEngage Studioのテストを送信
+
+1. iOS実機でアプリを起動し、通知を許可します。Xcode consoleから現在のFCM registration tokenを取得します。
+2. Engage StudioでMobile Push campaignを開き、**キャンペーンコンテンツ**タブを選択します。
+3. **モバイルプッシュ通知を新規作成**をクリックします。既存のコンテンツがある場合は**編集**をクリックします。**モバイルプッシュ通知エディタ**が開きます。
+4. **モバイルプッシュ認証**で、アプリのFirebaseプロジェクトに対応する認証を選択します。
+5. **タイトル**と**メッセージ**を入力します。画像やタップ時の動作をテストする場合は、**画像**と**クリック時の動作**を設定します。
+6. **テスト送信**をクリックします。
+7. **テストデバイストークン**にtokenを入力します。
+8. **送信**をクリックします。
+9. foregroundとbackgroundで、通知表示、タップ時の動作、campaign eventを確認します。
+
+**注意:** backgroundの`delivery`イベントは、iOSがbackground callbackを呼び出した場合にのみ記録されます。
+
+#### iOS Simulatorでテストpayloadを直接送信
 
 **前提条件:**
 - **Xcode（完全版）がインストールされていること**
@@ -93,8 +102,37 @@ xcrun simctl push booted com.treasuredata.pushsample \
 ```
 
 **注意:**
-- シミュレータではAPNs経由の通知は受信できません。上記コマンドはシミュレータ専用機能です。
+- `simctl push`はpayloadをローカルで注入し、FCMとAPNsの配信経路を通りません。
 - `xcrun simctl`コマンドはXcodeがインストールされている必要があります。
+
+### テストpayloadファイル
+
+`shared/test-payloads/test-notification.apns`を`simctl push`で送り、iOS Simulator上の通知処理をローカルで確認します。campaign配信は、前述のEngage Studioの**Send test**で確認します。
+
+#### iOS Simulator
+
+- **Payload形式:** `aps`とcustom dataを直下に配置し、Simulator専用の`Simulator Target Bundle`を追加します。
+- **Message ID:** FCMが生成するmessage IDは含みません。
+- **通知オプション:** Engage Studioのpayloadと同様に、`sound`と`badge`は含みません。
+
+#### Payloadの変更方法
+
+| テスト内容 | Simulator fixture |
+|------------|-------------------|
+| Open app | `link`を削除 |
+| Open a web URL | `link`を許可されたHTTPS URLに設定 |
+| 画像なし | `image`と`aps.mutable-content`を削除 |
+
+画像には`.jpg`や`.png`などの拡張子を持つ、外部からアクセス可能なURLを指定してください。
+
+### Campaign IDとmessage ID
+
+| Platform | Campaign ID | FCM message ID |
+|----------|-------------|----------------|
+| Android | `RemoteMessage.data["tdCampaignId"]` | `RemoteMessage.messageId` |
+| iOS | `userInfo["tdCampaignId"]` | `userInfo["gcm.message_id"]` |
+
+アプリは`tdCampaignId`をイベントの`campaign_id`に、FCM message IDを`message_id`に記録します。message IDはFCMがmetadataとして付加します。
 
 ## 3. 通知受信の確認
 
@@ -104,13 +142,10 @@ xcrun simctl push booted com.treasuredata.pushsample \
 1. **アプリがフォアグラウンド**: バナーが表示される
 2. **アプリがバックグラウンド/終了**: 通知センターに表示される
 
-ログで確認：
+foregroundでは、次のログを確認します。backgroundでは、iOSがcallbackを呼び出した場合にだけ記録されます。
+
 ```
-📬 Notification received in foreground: {...}
-✅ Event enqueued. Total events: 1
-📡 Sending 1 events to Treasure Data
-📊 HTTP Status Code: 200
-✅ Successfully uploaded 1 events
+Delivery event added to Treasure Data SDK
 ```
 
 ### Android
@@ -119,11 +154,11 @@ xcrun simctl push booted com.treasuredata.pushsample \
 adb logcat | grep -E "FCMService|PushEvent|Notification"
 
 # 期待されるログ:
-📬 FCM message received from: ...
-Campaign ID: test_campaign_001
-Message ID: test_message_001
-✅ Event enqueued. Total events: 1
-✅ Notification displayed (ID: ...)
+FCM message received from: ...
+Campaign ID: <tdCampaignId from the payload>
+Message ID: <FCM-generated message ID>
+Delivery event added to Treasure Data SDK
+Notification displayed (ID: ...)
 ```
 
 ## 4. ユーザーアクションのテスト
@@ -136,17 +171,23 @@ Message ID: test_message_001
 
 **iOS:**
 ```
-👆 Notification tapped: {...}
+Open event added to Treasure Data SDK
 🔗 Deep link opened: tdpushsample://product/12345
 📦 Navigating to product: 12345
 ```
 
 **Android:**
 ```
-👆 Notification tapped - campaign: test_campaign_001
-🔗 Deep link opened: tdpushsample://product/12345
-📦 Navigating to product: 12345
+Open event added to Treasure Data SDK
+Deep link opened: tdpushsample://product/12345
+Navigating to product: 12345
 ```
+
+**iOSの状態別の確認:**
+
+- foreground、background、アプリ終了状態からのタップをそれぞれ確認します。
+- 1回のタップで`open`が1件記録され、設定した画面またはweb linkが開くことを確認します。**Open app**の場合はアプリの画面を表示します。
+- background実行は保証されないため、終了状態からのタップの確認では`delivery`イベントを必須にしません。
 
 ### 4.2 通知削除（Dismiss Event）
 
@@ -154,19 +195,22 @@ Message ID: test_message_001
 2. ログで確認：
 
 ```
-🗑️ Notification dismissed - campaign: test_campaign_001
-✅ Event enqueued. Total events: 1
+Dismiss event added to Treasure Data SDK
 ```
 
 ### 4.3 ディープリンク（Deep Link Open Event）
 
-通知ペイロードに`deeplink`フィールドが含まれている場合：
+**Payload:**
 
 ```json
 {
-  "deeplink": "tdpushsample://product/12345"
+  "link": "tdpushsample://product/12345"
 }
 ```
+
+**Platform別の設定:**
+- **Android:** Engage Studioの**クリック時の動作**で**ディープリンクを開く**を選択し、URLを入力します。`data.link`として送信されます。
+- **iOS:** ローカルのAPNs payloadの直下に`link`を設定します。Engage Studioが使用するcustom data keyと同じ名前です。
 
 通知タップ時に：
 1. アプリ内で該当画面に遷移
@@ -190,10 +234,9 @@ Message ID: test_message_001
 
 ### 5.1 アプリ内での確認
 
-**iOS/Android:**
-- アプリのメイン画面で「Queued Events」カウンターを確認
-- 「Upload Events Now」ボタンをタップして手動アップロード
-- ログでHTTPステータスコード200を確認
+- Xcode consoleまたはLogcatで`Delivery/Open/Dismiss event added to Treasure Data SDK`を確認します。これはSDKへの追加を示します。アップロードの確認には、次のTreasure Dataのqueryを使用します。
+- iOSの「Queued Events」と「Upload Events Now」は旧EventQueue用のため、通知イベントの確認には使用しません。通知イベントはTreasure Data SDKに直接追加されます。
+- Androidの「Upload Events Now」はSDKのイベントを手動アップロードします。
 
 ### 5.2 Treasure Data Consoleでの確認
 
@@ -222,11 +265,13 @@ LIMIT 100
 
 **期待される結果:**
 
+以下はcampaign ID `12345`で**Open a deep link**を選択し、Engage Studioの**Send test**で送信した場合のイベント例です。message IDはFCMが通知ごとに生成します。`simctl push`はFCM message IDを生成しません。
+
 | time | type | campaign_id | message_id | platform |
 |------|------|-------------|------------|----------|
-| 2025-01-15 10:30:00 | delivery | test_campaign_001 | test_message_001 | ios |
-| 2025-01-15 10:30:05 | open | test_campaign_001 | test_message_001 | ios |
-| 2025-01-15 10:30:06 | deeplink_open | test_campaign_001 | test_message_001 | ios |
+| 2025-01-15 10:30:00 | delivery | 12345 | `FCM-generated ID` | ios |
+| 2025-01-15 10:30:05 | open | 12345 | `FCM-generated ID` | ios |
+| 2025-01-15 10:30:06 | deeplink_open | 12345 | `FCM-generated ID` | ios |
 
 ### 5.3 イベント集計例
 
@@ -263,7 +308,7 @@ ORDER BY total_sent DESC
 
 ### シナリオ3: ディープリンク
 
-1. `deeplink`フィールドを含む通知を送信
+1. Androidでは`data.link`、iOSではnotification userInfoの`link`にdeep linkを指定して送信
 2. 通知をタップ
 3. アプリ内で正しい画面に遷移することを確認
 4. `deeplink_open`イベントがTreasure Dataに送信されることを確認

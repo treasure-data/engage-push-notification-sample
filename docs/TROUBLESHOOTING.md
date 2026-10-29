@@ -307,7 +307,7 @@ URL: https://in.treasuredata.com/postback/v3/event/mobile/push_events
 3. **Verify Notification Payload**
    ```json
    {
-     "deeplink": "tdpushsample://product/12345"  // Check scheme
+     "link": "tdpushsample://product/12345"  // Check scheme
    }
    ```
 

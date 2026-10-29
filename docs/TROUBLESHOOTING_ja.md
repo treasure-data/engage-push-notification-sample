@@ -307,7 +307,7 @@ URL: https://in.treasuredata.com/postback/v3/event/mobile/push_events
 3. **通知ペイロードの確認**
    ```json
    {
-     "deeplink": "tdpushsample://product/12345"  // スキームが正しいか
+     "link": "tdpushsample://product/12345"  // スキームが正しいか
    }
    ```
 
