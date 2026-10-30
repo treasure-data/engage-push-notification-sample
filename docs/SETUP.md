@@ -7,9 +7,9 @@ This document provides detailed setup instructions for the sample app.
 ### Development Environment
 
 **iOS:**
-- macOS 12.0 or later
-- Xcode 14.0 or later
-- CocoaPods 1.11 or later
+- macOS 14.5 or later
+- Xcode 16.2 or later
+- iOS 15.0 or later
 - Physical device (required for APNs testing)
 
 **Android:**

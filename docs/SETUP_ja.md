@@ -7,9 +7,9 @@
 ### 開発環境
 
 **iOS:**
-- macOS 12.0以上
-- Xcode 14.0以上
-- CocoaPods 1.11以上
+- macOS 14.5以上
+- Xcode 16.2以上
+- iOS 15.0以上
 - 実機（APNsテストに必要）
 
 **Android:**

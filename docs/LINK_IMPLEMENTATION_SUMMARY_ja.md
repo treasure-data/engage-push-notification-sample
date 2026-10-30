@@ -94,20 +94,30 @@ buildConfigField("String", "ALLOWED_DEEP_LINK_HOSTS", "\"product,category,home\"
 - `TrackingService.shared.trackLinkFailEvent()`: 失敗を理由付きでトラッキング
 - `TrackingService.shared.trackDeepLinkOpenEvent()`: DeepLink開封をトラッキング
 - `TrackingService.shared.trackWebLinkOpenEvent()`: Webリンク開封をトラッキング
-- `fallbackToHome()`: リンクが無効な場合のフォールバック
+- `handleNotificationTap()`: `link`のschemeに応じてWeb URLまたはdeep linkを処理
 
 ## リンク処理フロー
 
 ### 1. 通知受信
-```
-FCMペイロード: {
-  "data": {
-    "link": "https://example.com/page" または "tdpushsample://product/12345",
-    "campaign_id": "campaign123",
-    "message_id": "msg456"
-  }
+
+Engage Studioは、リンク処理に使用する以下のcustom dataを送信します。ここでは他の通知fieldを省略しています。
+
+```json
+{
+  "link": "tdpushsample://product/12345",
+  "tdCampaignId": "campaign123"
 }
 ```
+
+| Platform | Link | Campaign ID | FCM message ID |
+|----------|------|-------------|----------------|
+| Android | `RemoteMessage.data["link"]` | `RemoteMessage.data["tdCampaignId"]` | `RemoteMessage.messageId` |
+| iOS | `userInfo["link"]` | `userInfo["tdCampaignId"]` | `userInfo["gcm.message_id"]` |
+
+**Linkの動作:**
+- Web URLの場合は`link`に許可されたHTTPS URLを設定します。
+- **Open app**では`link`を省略し、追加のURL遷移を行わずにアプリを開きます。
+- iOSのcustom dataはAPNsの`aps`とともに`userInfo`直下に渡されます。
 
 ### 2. スキーマ判定
 ```
@@ -397,36 +407,38 @@ private lazy var allowedDeepLinkHosts: Set<String> = {
 ```
 
 **2. Webリンク処理**
+
+`campaignId`と`messageId`は、switchの前に`extractCampaignAndMessageIDs(from:)`で取得します。
+
 ```swift
 case "http", "https":
-    let campaignId = userInfo["campaign_id"] as? String ?? ""
-    let messageId = userInfo["message_id"] as? String ?? ""
-
-    // ドメイン検証
     guard let host = url.host, allowedDomains.contains(host) else {
-        TrackingService.shared.trackLinkFailEvent(
-            link: linkField,
-            campaignId: campaignId,
-            messageId: messageId,
-            reason: "domain_not_allowed"
-        )
-        fallbackToHome()
+        LogHelper.warning("Domain not in allowlist: \(url.host ?? "nil") (allowed: \(allowedDomains.joined(separator: ", ")))")
+        TrackingService.shared.trackLinkFailEvent(link: link, campaignId: campaignId, messageId: messageId, reason: "domain_not_allowed")
         return
     }
 
-    // Safariで開く
-    UIApplication.shared.open(url) { success in
-        if success {
-            TrackingService.shared.trackLinkArriveEvent(link: linkField, ...)
-        } else {
-            TrackingService.shared.trackLinkFailEvent(link: linkField, ..., reason: "browser_open_failed")
+    TrackingService.shared.trackWebLinkOpenEvent(webLink: link, campaignId: campaignId, messageId: messageId)
+    if UIApplication.shared.canOpenURL(url) {
+        UIApplication.shared.open(url, options: [:]) { success in
+            if success {
+                LogHelper.debug("Successfully opened URL in Safari")
+                // Records a successful URL handoff; page loading is outside this callback.
+                TrackingService.shared.trackLinkArriveEvent(link: link, campaignId: campaignId, messageId: messageId)
+            } else {
+                LogHelper.error("Failed to open URL in Safari")
+                TrackingService.shared.trackLinkFailEvent(link: link, campaignId: campaignId, messageId: messageId, reason: "browser_open_failed")
+            }
         }
+    } else {
+        LogHelper.error("Cannot open URL (canOpenURL returned false): \(url)")
+        TrackingService.shared.trackLinkFailEvent(link: link, campaignId: campaignId, messageId: messageId, reason: "browser_open_failed")
     }
 ```
 
 #### SceneDelegate.swift の主要な変更
 
-**1. 通知からのDeepLink処理**
+**1. アプリ内からのDeepLink処理**
 ```swift
 @objc private func handleDeepLink(_ notification: Notification) {
     guard let userInfo = notification.userInfo,
@@ -483,7 +495,7 @@ case "product":
 
 **問題4: iOS でビルドエラー**
 - `pod install` を実行したか確認
-- Xcodeのバージョンを確認（iOS 13.0+対応）
+- Xcodeのバージョンを確認（Xcode 16.2以上、iOS 15.0以上）
 - TrackingService.swift がプロジェクトに追加されているか確認
 
 ## まとめ

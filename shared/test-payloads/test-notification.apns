@@ -1,17 +1,17 @@
 {
   "Simulator Target Bundle": "com.treasuredata.pushsample",
   "aps": {
+    "content-available": 1,
+    "category": "default",
     "alert": {
       "title": "Special Sale!",
       "body": "Get 50% off on selected items. Limited time offer!"
     },
-    "sound": "default",
-    "badge": 1,
     "mutable-content": 1
   },
-  "campaign_id": "12345",
-  "message_id": "msg-001",
-  "deeplink": "tdpushsample://product/12345",
-  "link": "https://example.com/promo",
-  "image": "https://picsum.photos/400/300"
+  "tdCampaignId": "12345",
+  "title": "Special Sale!",
+  "message": "Get 50% off on selected items. Limited time offer!",
+  "image": "https://picsum.photos/id/237/400/300.jpg",
+  "link": "tdpushsample://product/12345"
 }

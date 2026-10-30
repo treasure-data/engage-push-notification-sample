@@ -20,8 +20,13 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window?.rootViewController = ViewController()
         window?.makeKeyAndVisible()
 
-        // Handle deep link from notification
+        // CategoryView also uses this notification for in-app links.
         NotificationCenter.default.addObserver(self, selector: #selector(handleDeepLink(_:)), name: NSNotification.Name("OpenDeepLink"), object: nil)
+
+        // Scene-based launches may deliver the notification response through connection options.
+        if let response = connectionOptions.notificationResponse {
+            (UIApplication.shared.delegate as? AppDelegate)?.handleNotificationResponse(response)
+        }
 
         // Handle deep link if app was opened via URL (direct deep link, no campaign data)
         if let urlContext = connectionOptions.urlContexts.first {
@@ -46,7 +51,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         handleDeepLink(url: url, deepLink: deepLink, campaignId: campaignId, messageId: messageId)
     }
 
-    private func handleDeepLink(url: URL, deepLink: String, campaignId: String, messageId: String) {
+    func handleDeepLink(url: URL, deepLink: String, campaignId: String, messageId: String) {
         LogHelper.debug("🔗 Deep link opened: \(url)")
 
         // Get configured deep link scheme from Info.plist
@@ -145,6 +150,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
 
     func sceneDidBecomeActive(_ scene: UIScene) {
+        (UIApplication.shared.delegate as? AppDelegate)?.notificationSceneDidBecomeActive(self)
+
         // Clear badge count when app becomes active
         UIApplication.shared.applicationIconBadgeNumber = 0
     }

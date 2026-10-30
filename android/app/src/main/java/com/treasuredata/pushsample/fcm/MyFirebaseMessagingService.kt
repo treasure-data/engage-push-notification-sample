@@ -75,48 +75,16 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         }
         logDebug(TAG, "===============================================")
 
-        // CUSTOMIZE: Extract notification data from FCM payload
-        // Campaign and message IDs: prioritize custom fields, fallback to FCM messageId
-        val campaignId = message.data["campaign_id"]
-            ?: message.data["td_campaign_id"]
-            ?: ""
-        val messageId = message.data["message_id"]
-            ?: message.data["td_message_id"]
-            ?: message.messageId
-            ?: ""
+        // Extract campaign and FCM message IDs for event tracking
+        val campaignId = message.data["tdCampaignId"].orEmpty()
+        val messageId = message.messageId.orEmpty()
 
-        // Title and body: prioritize notification object (standard FCM), fallback to data
-        val title = message.notification?.title
-            ?: message.data["title"]
-            ?: getString(R.string.notification_default_title)
-        val body = message.notification?.body
-            ?: message.data["body"]
-            ?: ""
+        // Engage Studio sends Android notifications as data-only FCM messages.
+        val title = message.data["title"] ?: getString(R.string.notification_default_title)
+        val body = message.data["message"].orEmpty()
+        val imageUrl = message.data["image"]
 
-        // Image URL: prioritize notification.imageUrl (standard FCM), fallback to data
-        val imageUrl = message.notification?.imageUrl?.toString()
-            ?: message.data["image"]
-
-        // Link fields: handle both deeplink and link separately if both exist
-        // Engage Studio may send both 'deeplink' and 'link' fields
-        val deeplinkField = message.data["deeplink"]
-        val linkField = message.data["link"]
-
-        val (deepLink, webLink) = when {
-            deeplinkField != null && linkField != null -> {
-                // Both fields present: use deeplink as deep link, link as web link
-                Pair(deeplinkField, linkField)
-            }
-            deeplinkField != null -> {
-                // Only deeplink field: parse to determine type
-                parseLinkField(deeplinkField)
-            }
-            linkField != null -> {
-                // Only link field: parse to determine type
-                parseLinkField(linkField)
-            }
-            else -> Pair(null, null)
-        }
+        val (deepLink, webLink) = parseLinkField(message.data["link"])
 
         logDebug(TAG, getString(R.string.log_campaign_id, campaignId))
         logDebug(TAG, getString(R.string.log_message_id, messageId))

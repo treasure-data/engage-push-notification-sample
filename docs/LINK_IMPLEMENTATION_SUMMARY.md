@@ -94,20 +94,30 @@ buildConfigField("String", "ALLOWED_DEEP_LINK_HOSTS", "\"product,category,home\"
 - `TrackingService.shared.trackLinkFailEvent()`: Track failure with reason
 - `TrackingService.shared.trackDeepLinkOpenEvent()`: Track deep link open
 - `TrackingService.shared.trackWebLinkOpenEvent()`: Track web link open
-- `fallbackToHome()`: Fallback when links are invalid
+- `handleNotificationTap()`: Routes `link` by its web URL or configured deep link scheme
 
 ## Link Processing Flow
 
 ### 1. Notification Received
-```
-FCM Payload: {
-  "data": {
-    "link": "https://example.com/page" OR "tdpushsample://product/12345",
-    "campaign_id": "campaign123",
-    "message_id": "msg456"
-  }
+
+Engage Studio supplies the following custom data for link handling. Other notification fields are omitted here.
+
+```json
+{
+  "link": "tdpushsample://product/12345",
+  "tdCampaignId": "campaign123"
 }
 ```
+
+| Platform | Link | Campaign ID | FCM message ID |
+|----------|------|-------------|----------------|
+| Android | `RemoteMessage.data["link"]` | `RemoteMessage.data["tdCampaignId"]` | `RemoteMessage.messageId` |
+| iOS | `userInfo["link"]` | `userInfo["tdCampaignId"]` | `userInfo["gcm.message_id"]` |
+
+**Link Behavior:**
+- For a web URL, set `link` to an allowed HTTPS URL.
+- **Open app** omits `link`; the app opens without additional URL navigation.
+- iOS custom data is at the root of `userInfo`, alongside APNs `aps`.
 
 ### 2. Scheme Detection
 ```
