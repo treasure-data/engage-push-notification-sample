@@ -173,65 +173,106 @@ cd android
 
 ### Repository Root
 ```
-mobile-push-samples/
-├── android/                        # Android sample app
+engage-push-notification-sample/
+├── android/                              # Android sample app
 │   ├── app/
 │   │   ├── src/main/
 │   │   │   ├── java/com/treasuredata/pushsample/
+│   │   │   │   ├── fcm/
+│   │   │   │   │   ├── FcmTokenService.kt
+│   │   │   │   │   ├── MyFirebaseMessagingService.kt
+│   │   │   │   │   ├── PushAction.kt
+│   │   │   │   │   └── PushEventReceiver.kt
+│   │   │   │   ├── utils/
+│   │   │   │   │   └── TimeUtils.kt
+│   │   │   │   ├── CategoryActivity.kt
 │   │   │   │   ├── MainActivity.kt
 │   │   │   │   ├── MyApplication.kt
-│   │   │   │   └── fcm/
-│   │   │   │       ├── MyFirebaseMessagingService.kt
-│   │   │   │       ├── PushEventReceiver.kt
-│   │   │   │       ├── PushAction.kt
-│   │   │   │       ├── FcmTokenService.kt
-│   │   │   │       ├── EventQueue.kt
-│   │   │   │       └── PushEventUploader.kt
+│   │   │   │   └── ProductDetailActivity.kt
 │   │   │   ├── res/
+│   │   │   │   ├── drawable/ic_notification.xml
+│   │   │   │   ├── layout/
+│   │   │   │   │   ├── activity_category.xml
+│   │   │   │   │   ├── activity_main.xml
+│   │   │   │   │   └── activity_product_detail.xml
+│   │   │   │   ├── mipmap-anydpi-v26/
+│   │   │   │   │   ├── ic_launcher.xml
+│   │   │   │   │   └── ic_launcher_round.xml
+│   │   │   │   └── values/
+│   │   │   │       ├── colors.xml
+│   │   │   │       └── strings.xml
 │   │   │   └── AndroidManifest.xml
 │   │   ├── build.gradle.kts
 │   │   └── google-services.json.example
-│   ├── gradle/
+│   ├── gradle/wrapper/
+│   │   ├── gradle-wrapper.jar
+│   │   └── gradle-wrapper.properties
 │   ├── build.gradle.kts
+│   ├── gradle.properties
+│   ├── gradlew
+│   ├── gradlew.bat
+│   ├── local.properties.example
 │   └── settings.gradle.kts
-├── ios/                            # iOS sample app
-│   ├── MyApp/
-│   │   ├── AppDelegate.swift
-│   │   ├── SceneDelegate.swift
-│   │   ├── ViewController.swift
-│   │   ├── Models/
-│   │   │   ├── FCMTokenService.swift
-│   │   │   ├── EventQueue.swift
-│   │   │   └── PushEventUploader.swift
-│   │   ├── Assets.xcassets
-│   │   ├── Info.plist
-│   │   └── GoogleService-Info.plist.example
-│   ├── NotificationService/        # Extension
-│   │   └── NotificationService.swift
-│   ├── MyApp.xcodeproj/
-│   └── Podfile
-├── shared/                         # Shared assets and configs
-│   ├── test-payloads/
-│   │   └── test-notification.apns  # iOS Simulator local notification payload
-│   └── images/
-├── docs/                           # Additional documentation
+├── docs/                               # Project documentation (English and Japanese)
+│   ├── API_REFERENCE.md
+│   ├── API_REFERENCE_ja.md
+│   ├── LINK_IMPLEMENTATION_SUMMARY.md
+│   ├── LINK_IMPLEMENTATION_SUMMARY_ja.md
 │   ├── SETUP.md
+│   ├── SETUP_ja.md
 │   ├── TESTING.md
-│   └── TROUBLESHOOTING.md
+│   ├── TESTING_ja.md
+│   ├── TROUBLESHOOTING.md
+│   ├── TROUBLESHOOTING_ja.md
+│   ├── _config.yml
+│   └── index.md
+├── ios/                                # iOS sample app and notification extension
+│   ├── NotificationService/
+│   │   ├── Info.plist
+│   │   ├── NotificationService.entitlements
+│   │   └── NotificationService.swift
+│   ├── TDPushSample/
+│   │   ├── Models/
+│   │   │   ├── EventQueue.swift
+│   │   │   ├── FCMTokenService.swift
+│   │   │   └── PushEventUploader.swift
+│   │   ├── Utils/
+│   │   │   ├── LogHelper.swift
+│   │   │   └── TimeUtils.swift
+│   │   ├── AppDelegate.swift
+│   │   ├── CategoryView.swift
+│   │   ├── GoogleService-Info.plist.example
+│   │   ├── Info.plist
+│   │   ├── ProductDetailView.swift
+│   │   ├── SceneDelegate.swift
+│   │   ├── TDPushSample.entitlements
+│   │   ├── TrackingService.swift
+│   │   └── ViewController.swift
+│   └── project.yml                    # XcodeGen project definition
+├── shared/
+│   └── test-payloads/
+│       └── test-notification.apns     # iOS Simulator notification payload
 ├── .gitignore
+├── CLAUDE.md
 ├── README.md
-└── CLAUDE.md                       # This file
+└── README_ja.md
 ```
 
+The generated Xcode project is not checked in; generate it from `ios/project.yml` with XcodeGen. Create local Firebase configuration files from the `.example` templates at `android/app/google-services.json` and `ios/TDPushSample/GoogleService-Info.plist`; both are gitignored.
+
 ### iOS Directory Pattern
-- **AppDelegate.swift**: Firebase init, notification permissions, FCM delegates
-- **SceneDelegate.swift**: Deep link routing (iOS 13+)
-- **Models/**: Service classes (token, queue, uploader)
-- **NotificationService/**: Rich media extension
+- **AppDelegate.swift**: Firebase initialization and notification delegate setup
+- **SceneDelegate.swift**: Scene and deep link routing
+- **Models/**: Token service, event queue, and event uploader
+- **Utils/**: Logging and time utilities
+- **NotificationService/**: Notification service extension
+- **TrackingService.swift**: App event tracking
 
 ### Android Directory Pattern
-- **fcm/**: All push notification related services
-- **MainActivity.kt**: Deep link handling, notification tap events
+- **fcm/**: FCM token service, message service, notification actions, and event receiver
+- **utils/**: Time utilities
+- **MainActivity.kt**: Main screen and notification handling
+- **CategoryActivity.kt**, **ProductDetailActivity.kt**: Sample destination screens
 - **MyApplication.kt**: App-level initialization
 
 ---
